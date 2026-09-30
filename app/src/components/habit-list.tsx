@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ChevronDown, ChevronRight, ListPlus, Sparkles } from "lucide-react";
 import { HabitCard } from "@/components/habit-card";
 import { HabitChecklistRow } from "@/components/habit-checklist-row";
 import { HabitCompactRow } from "@/components/habit-compact-row";
@@ -425,14 +426,15 @@ export function HabitList({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-10">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Your habits</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Your habits</h1>
         <button
           type="button"
           onClick={() => setAddOpen(true)}
-          className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900"
+          className="flex items-center gap-1.5 rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
         >
+          <ListPlus className="h-4 w-4" aria-hidden />
           Add habit
         </button>
       </div>
@@ -447,15 +449,17 @@ export function HabitList({
       )}
 
       {habits.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-gray-300 py-16 text-center dark:border-gray-700">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-gray-300 py-20 text-center dark:border-gray-700">
+          <Sparkles className="h-8 w-8 text-gray-400" aria-hidden />
           <p className="text-gray-500">
             No habits yet. Create your first one to start your streak.
           </p>
           <button
             type="button"
             onClick={() => setAddOpen(true)}
-            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900"
+            className="flex items-center gap-1.5 rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
           >
+            <ListPlus className="h-4 w-4" aria-hidden />
             Add habit
           </button>
         </div>
@@ -495,7 +499,7 @@ export function HabitList({
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {habits.map((habit, index) => (
             <HabitCard
               key={habit.id}
@@ -539,9 +543,14 @@ export function HabitList({
           <button
             type="button"
             onClick={() => setShowArchived((v) => !v)}
-            className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+            className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
           >
-            {showArchived ? "▾" : "▸"} Archived ({archivedHabits.length})
+            {showArchived ? (
+              <ChevronDown className="h-4 w-4" aria-hidden />
+            ) : (
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            )}
+            Archived ({archivedHabits.length})
           </button>
           {showArchived && (
             <div className="flex flex-col gap-2">

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { HABIT_COLORS } from "@/lib/colors";
-import { HABIT_ICONS } from "@/lib/icons";
+import { HABIT_ICONS, getHabitIcon } from "@/lib/icons";
 
 export function HabitForm({
   initialName = "",
@@ -158,10 +158,18 @@ export function HabitForm({
         <span className="text-sm font-medium">Icon</span>
         <div className="flex items-center gap-2">
           <span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-300 text-lg dark:border-gray-700"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-300 dark:border-gray-700"
+            style={{ color }}
             aria-hidden
           >
-            {icon ? HABIT_ICONS.find((i) => i.name === icon)?.emoji : "—"}
+            {(() => {
+              const PreviewIcon = getHabitIcon(icon);
+              return PreviewIcon ? (
+                <PreviewIcon className="h-4.5 w-4.5" />
+              ) : (
+                <span className="text-gray-400">—</span>
+              );
+            })()}
           </span>
           <input
             type="text"
@@ -189,13 +197,13 @@ export function HabitForm({
               aria-label={i.name}
               aria-pressed={icon === i.name}
               onClick={() => setIcon(i.name)}
-              className={`flex h-8 w-8 items-center justify-center rounded-md text-base ${
+              className={`flex h-8 w-8 items-center justify-center rounded-md ${
                 icon === i.name
-                  ? "bg-gray-900 dark:bg-gray-100"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                  ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
+                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
               }`}
             >
-              {i.emoji}
+              <i.icon className="h-4.5 w-4.5" />
             </button>
           ))}
           {filteredIcons.length === 0 && (

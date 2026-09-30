@@ -1,6 +1,7 @@
 "use client";
 
-import { habitIconEmoji } from "@/lib/icons";
+import { Check, Minus, Plus } from "lucide-react";
+import { getHabitIcon } from "@/lib/icons";
 
 /**
  * Checklist layout (5.3): a dense, today-focused list — good for scanning
@@ -34,6 +35,7 @@ export function HabitChecklistRow({
   onOpen: () => void;
 }) {
   const done = isNumeric ? logValue >= targetCount : isLoggedToday;
+  const Icon = getHabitIcon(icon);
   return (
     <div
       className="flex items-center gap-3 rounded-md border border-gray-200 px-3 py-2 dark:border-gray-800"
@@ -45,23 +47,23 @@ export function HabitChecklistRow({
             type="button"
             onClick={() => onSetValue(Math.max(0, logValue - 1))}
             aria-label={`Decrease ${name}`}
-            className="flex h-7 w-7 items-center justify-center rounded-full border text-sm"
+            className="flex h-7 w-7 items-center justify-center rounded-full border"
             style={{ borderColor: color, color }}
           >
-            −
+            <Minus className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={() => onSetValue(logValue + 1)}
             aria-label={`Increase ${name}`}
-            className="flex h-7 w-7 items-center justify-center rounded-full border text-sm"
+            className="flex h-7 w-7 items-center justify-center rounded-full border"
             style={{
               backgroundColor: done ? color : "transparent",
               borderColor: color,
               color: done ? "#fff" : color,
             }}
           >
-            +
+            <Plus className="h-3.5 w-3.5" />
           </button>
         </div>
       ) : (
@@ -70,14 +72,14 @@ export function HabitChecklistRow({
           onClick={onToggleToday}
           aria-pressed={isLoggedToday}
           aria-label={`Mark ${name} done today`}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-sm"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border"
           style={{
             backgroundColor: isLoggedToday ? color : "transparent",
             borderColor: color,
             color: isLoggedToday ? "#fff" : color,
           }}
         >
-          {isLoggedToday ? "✓" : ""}
+          {isLoggedToday && <Check className="h-4 w-4" strokeWidth={3} />}
         </button>
       )}
 
@@ -88,7 +90,9 @@ export function HabitChecklistRow({
           done ? "text-gray-400 line-through decoration-gray-300" : ""
         }`}
       >
-        {icon && <span aria-hidden>{habitIconEmoji(icon)}</span>}
+        {Icon && (
+          <Icon className="h-4 w-4 shrink-0" style={{ color }} aria-hidden />
+        )}
         <span className="truncate text-sm font-medium">{name}</span>
       </button>
 

@@ -17,17 +17,17 @@ export function ViewSwitcher({
   onChange: (view: OverviewView) => void;
 }) {
   return (
-    <div className="flex gap-1 rounded-md border border-gray-200 p-0.5 dark:border-gray-800">
+    <div className="flex gap-1 rounded-full bg-gray-100 p-1 dark:bg-white/5">
       {OPTIONS.map((opt) => (
         <button
           key={opt.value}
           type="button"
           aria-pressed={view === opt.value}
           onClick={() => onChange(opt.value)}
-          className={`rounded px-3 py-1 text-xs font-medium ${
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
             view === opt.value
-              ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
-              : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              ? "bg-[var(--surface)] text-gray-900 shadow-sm dark:text-white"
+              : "text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
           }`}
         >
           {opt.label}

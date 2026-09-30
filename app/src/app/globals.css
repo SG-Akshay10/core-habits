@@ -9,27 +9,37 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f5f7;
+  --foreground: #14161a;
+  --surface: #ffffff;
+  --surface-border: rgba(20, 22, 26, 0.08);
   --habit-grid-empty: #e5e7eb;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #0c0d10;
+  --foreground: #f2f3f5;
+  --surface: #17181c;
+  --surface-border: rgba(255, 255, 255, 0.08);
   --habit-grid-empty: #27272a;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.card-surface {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
 }
 

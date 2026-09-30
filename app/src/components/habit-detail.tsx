@@ -9,7 +9,7 @@ import { GoalChip } from "@/components/goal-chip";
 import { StatsPanel } from "@/components/stats-panel";
 import { calculateStreak } from "@/lib/streak";
 import { calculateWeekStreak } from "@/lib/goals";
-import { habitIconEmoji } from "@/lib/icons";
+import { getHabitIcon } from "@/lib/icons";
 import { queueLogRequest } from "@/lib/offline-queue";
 import { ReminderSettings } from "@/components/reminder-settings";
 import { Dialog } from "@/components/dialog";
@@ -75,6 +75,7 @@ export function HabitDetail({
 
   const doneWord = type === "quit" ? "Clean" : "Done";
   const doneWordLower = type === "quit" ? "stayed clean" : "logged";
+  const Icon = getHabitIcon(icon);
 
   async function toggleDate(date: string) {
     if (date > today || pendingDates.has(date)) return;
@@ -199,7 +200,7 @@ export function HabitDetail({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-10">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-8">
       <div>
         <Link
           href="/dashboard"
@@ -215,7 +216,9 @@ export function HabitDetail({
             className="h-4 w-4 shrink-0 rounded-full"
             style={{ backgroundColor: color }}
           />
-          {icon && <span aria-hidden>{habitIconEmoji(icon)}</span>}
+          {Icon && (
+            <Icon className="h-5 w-5" style={{ color }} aria-hidden />
+          )}
           <h1 className="text-xl font-semibold">{name}</h1>
           <span className="rounded-full border border-gray-300 px-2 py-0.5 text-xs text-gray-500 dark:border-gray-700">
             {type === "quit" ? "Quitting" : "Building"}

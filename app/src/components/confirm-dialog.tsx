@@ -28,7 +28,7 @@ export function ConfirmDialog({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md px-4 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="rounded-full px-4 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           Cancel
         </button>
@@ -36,7 +36,7 @@ export function ConfirmDialog({
           type="button"
           disabled={pending}
           onClick={onConfirm}
-          className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+          className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
         >
           {pending ? "Deleting…" : confirmLabel}
         </button>
