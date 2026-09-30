@@ -8,6 +8,7 @@ import { ViewSwitcher, type OverviewView } from "@/components/view-switcher";
 import { Dialog } from "@/components/dialog";
 import { HabitForm } from "@/components/habit-form";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { queueLogRequest } from "@/lib/offline-queue";
 
 export type HabitData = {
   id: string;
@@ -309,6 +310,17 @@ export function HabitList({
       ),
     );
 
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      // Offline: queue for later sync instead of rolling back — the user
+      // still sees the log as done, and it syncs once reconnected.
+      await queueLogRequest({
+        habitId,
+        date: today,
+        method: isLogged ? "DELETE" : "PUT",
+      });
+      return;
+    }
+
     try {
       const res = await fetch(
         `/api/habits/${habitId}/logs/${encodeURIComponent(today)}`,
@@ -316,6 +328,14 @@ export function HabitList({
       );
       if (!res.ok) throw new Error("failed");
     } catch {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        await queueLogRequest({
+          habitId,
+          date: today,
+          method: isLogged ? "DELETE" : "PUT",
+        });
+        return;
+      }
       // Rollback on failure.
       setHabits((prev) =>
         prev.map((h) =>
@@ -358,6 +378,20 @@ export function HabitList({
       ),
     );
 
+    const queueOffline = async () => {
+      await queueLogRequest({
+        habitId,
+        date: today,
+        method: value > 0 ? "PUT" : "DELETE",
+        body: value > 0 ? { value } : undefined,
+      });
+    };
+
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      await queueOffline();
+      return;
+    }
+
     try {
       const res =
         value > 0
@@ -375,6 +409,10 @@ export function HabitList({
             );
       if (!res.ok) throw new Error("failed");
     } catch {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        await queueOffline();
+        return;
+      }
       // Rollback on failure.
       setHabits((prev) =>
         prev.map((h) =>

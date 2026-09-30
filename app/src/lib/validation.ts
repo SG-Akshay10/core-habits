@@ -132,3 +132,40 @@ export const logBodySchema = z.object({
   value: logValueSchema.optional(),
 });
 
+export const reminderTimeSchema = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time (expected HH:MM)");
+
+export const reminderDaysOfWeekSchema = z
+  .array(z.number().int().min(0).max(6))
+  .min(1, "Select at least one day")
+  .max(7);
+
+export const createReminderSchema = z.object({
+  time: reminderTimeSchema,
+  daysOfWeek: reminderDaysOfWeekSchema,
+  enabled: z.boolean().optional().default(true),
+});
+
+export const updateReminderSchema = z
+  .object({
+    time: reminderTimeSchema.optional(),
+    daysOfWeek: reminderDaysOfWeekSchema.optional(),
+    enabled: z.boolean().optional(),
+  })
+  .refine(
+    (data) =>
+      data.time !== undefined ||
+      data.daysOfWeek !== undefined ||
+      data.enabled !== undefined,
+    { message: "At least one field must be provided" },
+  );
+
+export const pushSubscriptionSchema = z.object({
+  endpoint: z.string().url(),
+  keys: z.object({
+    p256dh: z.string().min(1),
+    auth: z.string().min(1),
+  }),
+});
+

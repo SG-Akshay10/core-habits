@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { THEME_COOKIE, isValidTheme } from "@/lib/theme";
+import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,6 +18,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Core Habits",
   description: "A simple, one-tap daily habit tracker.",
+  manifest: "/manifest.webmanifest",
+  icons: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
+};
+
+export const viewport = {
+  themeColor: "#111827",
 };
 
 // Inline, pre-hydration script: resolves "system" to the OS preference and
@@ -55,7 +62,10 @@ export default async function RootLayout({
           <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         )}
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <PwaRegister />
+      </body>
     </html>
   );
 }

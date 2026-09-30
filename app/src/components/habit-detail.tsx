@@ -10,6 +10,8 @@ import { StatsPanel } from "@/components/stats-panel";
 import { calculateStreak } from "@/lib/streak";
 import { calculateWeekStreak } from "@/lib/goals";
 import { habitIconEmoji } from "@/lib/icons";
+import { queueLogRequest } from "@/lib/offline-queue";
+import { ReminderSettings } from "@/components/reminder-settings";
 
 export type LogEntry = { date: string; note: string | null; value?: number };
 
@@ -93,6 +95,14 @@ export function HabitDetail({
       );
       if (!res.ok) throw new Error("failed");
     } catch {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        await queueLogRequest({
+          habitId,
+          date,
+          method: isLogged ? "DELETE" : "PUT",
+        });
+        return;
+      }
       // Rollback on failure.
       setLogs((prev) => {
         const next = new Map(prev);
@@ -171,6 +181,15 @@ export function HabitDetail({
             );
       if (!res.ok) throw new Error("failed");
     } catch {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        await queueLogRequest({
+          habitId,
+          date: today,
+          method: value > 0 ? "PUT" : "DELETE",
+          body: value > 0 ? { value } : undefined,
+        });
+        return;
+      }
       setLogs(prevLogs);
       setValues(prevValues);
     }
@@ -249,6 +268,11 @@ export function HabitDetail({
           </div>
         </section>
       )}
+
+      <section className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+        <h2 className="mb-3 text-sm font-medium text-gray-500">Reminders</h2>
+        <ReminderSettings habitId={habitId} />
+      </section>
 
       <section className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
         <h2 className="mb-3 text-sm font-medium text-gray-500">Stats</h2>
