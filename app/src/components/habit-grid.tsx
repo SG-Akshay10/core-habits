@@ -43,6 +43,7 @@ export function HabitGrid({
   });
 
   return (
+<<<<<<< HEAD
     <div className="w-full overflow-x-auto">
       <div className="flex gap-[3px]" dir="ltr">
         <div className="grid grid-rows-7 gap-[3px] pt-[18px]">
@@ -55,6 +56,41 @@ export function HabitGrid({
               {label}
             </span>
           ))}
+=======
+    <div
+      className="grid w-full gap-[2px]"
+      dir="ltr"
+      style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}
+    >
+      {columns.map((column, colIdx) => (
+        <div key={colIdx} className="grid grid-rows-7 gap-[2px]">
+          {column.map((date) => {
+            const isFuture = date > today;
+            const isLogged = logDates.has(date);
+            const clickable = !isFuture && !!onToggleDate;
+            return (
+              <button
+                key={date}
+                type="button"
+                disabled={!clickable}
+                onClick={clickable ? () => onToggleDate!(date) : undefined}
+                title={`${date} — ${isLogged ? "logged" : "not logged"}`}
+                aria-label={`${date}, ${isFuture ? "future date" : isLogged ? "logged" : "not logged"}`}
+                aria-pressed={!isFuture ? isLogged : undefined}
+                className={`aspect-square w-full rounded-[2px] motion-reduce:transition-none ${
+                  clickable ? "cursor-pointer hover:opacity-80" : ""
+                }`}
+                style={{
+                  backgroundColor: isFuture
+                    ? "transparent"
+                    : isLogged
+                      ? color
+                      : "var(--habit-grid-empty, #e5e7eb)",
+                }}
+              />
+            );
+          })}
+>>>>>>> origin/dev
         </div>
 
         <div
