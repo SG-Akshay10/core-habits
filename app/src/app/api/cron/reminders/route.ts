@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendPushNotification, isPushConfigured } from "@/lib/push";
+import { sendReminderEmail, isEmailConfigured } from "@/lib/email";
 import { todayInTimezone } from "@/lib/date";
 
 /**
@@ -27,8 +28,10 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!isPushConfigured()) {
-    return NextResponse.json({ ok: true, sent: 0, skipped: "push-not-configured" });
+  const pushEnabled = isPushConfigured();
+  const emailEnabled = isEmailConfigured();
+  if (!pushEnabled && !emailEnabled) {
+    return NextResponse.json({ ok: true, sent: 0, skipped: "not-configured" });
   }
 
   const reminders = await prisma.reminder.findMany({
@@ -43,6 +46,7 @@ export async function GET(req: Request) {
   });
 
   let sent = 0;
+  let emailsSent = 0;
   let skippedAlreadyLogged = 0;
   let pruned = 0;
   const errors: string[] = [];
@@ -79,27 +83,43 @@ export async function GET(req: Request) {
       continue;
     }
 
-    for (const sub of user.pushSubscriptions) {
-      const result = await sendPushNotification(
-        { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
-        {
-          title: "Habit reminder",
-          body: `Time for "${habit.name}"`,
-          habitId: habit.id,
-          url: `/habits/${habit.id}`,
-        },
-      );
-      if (result.ok) {
-        sent += 1;
-      } else if (result.expired) {
-        // Dead subscription — prune it so it never errors future runs.
-        await prisma.pushSubscription
-          .delete({ where: { id: sub.id } })
-          .catch(() => {});
-        pruned += 1;
-      } else {
-        errors.push(`${habit.id}:${sub.id}`);
+    if (pushEnabled) {
+      for (const sub of user.pushSubscriptions) {
+        const result = await sendPushNotification(
+          { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
+          {
+            title: "Habit reminder",
+            body: `Time for "${habit.name}"`,
+            habitId: habit.id,
+            url: `/habits/${habit.id}`,
+          },
+        );
+        if (result.ok) {
+          sent += 1;
+        } else if (result.expired) {
+          // Dead subscription — prune it so it never errors future runs.
+          await prisma.pushSubscription
+            .delete({ where: { id: sub.id } })
+            .catch(() => {});
+          pruned += 1;
+        } else {
+          errors.push(`${habit.id}:${sub.id}`);
+        }
       }
+    }
+
+    // Email fallback (PRD 6.9): only for users with no push subscriptions
+    // at all — e.g. iOS Safari without the PWA installed to the home
+    // screen — so installed users don't get a duplicate email + push.
+    if (emailEnabled && user.pushSubscriptions.length === 0 && user.email) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+      const result = await sendReminderEmail(
+        user.email,
+        habit.name,
+        `${baseUrl}/habits/${habit.id}`,
+      );
+      if (result.ok) emailsSent += 1;
+      else errors.push(`email:${habit.id}:${user.id}`);
     }
 
     await prisma.reminder
@@ -110,6 +130,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     ok: true,
     sent,
+    emailsSent,
     skippedAlreadyLogged,
     pruned,
     errors: errors.length,
