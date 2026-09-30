@@ -12,6 +12,8 @@ import { calculateWeekStreak } from "@/lib/goals";
 import { habitIconEmoji } from "@/lib/icons";
 import { queueLogRequest } from "@/lib/offline-queue";
 import { ReminderSettings } from "@/components/reminder-settings";
+import { Dialog } from "@/components/dialog";
+import { ShareCard } from "@/components/share-card";
 
 export type LogEntry = { date: string; note: string | null; value?: number };
 
@@ -55,6 +57,7 @@ export function HabitDetail({
   const [noteDraft, setNoteDraft] = useState("");
   const [noteSaving, setNoteSaving] = useState(false);
   const [pendingDates, setPendingDates] = useState<Set<string>>(new Set());
+  const [shareOpen, setShareOpen] = useState(false);
 
   const logDates = useMemo(() => new Set(logs.keys()), [logs]);
   const goal = useMemo(
@@ -218,8 +221,32 @@ export function HabitDetail({
             {type === "quit" ? "Quitting" : "Building"}
           </span>
         </div>
-        <StreakChips current={streak.current} longest={streak.longest} />
+        <div className="flex items-center gap-3">
+          <StreakChips current={streak.current} longest={streak.longest} />
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+          >
+            Share
+          </button>
+        </div>
       </div>
+
+      <Dialog
+        open={shareOpen}
+        title={`Share ${name}`}
+        onClose={() => setShareOpen(false)}
+        wide
+      >
+        <ShareCard
+          habitName={name}
+          icon={icon}
+          logDates={logDates}
+          today={today}
+          defaultColor={color}
+        />
+      </Dialog>
 
       {goalType !== "daily" && (
         <div>
