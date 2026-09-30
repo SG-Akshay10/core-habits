@@ -210,12 +210,8 @@ export function HabitDetail({
         </Link>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span
-            className="h-4 w-4 shrink-0 rounded-full"
-            style={{ backgroundColor: color }}
-          />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
           {Icon && (
             <Icon className="h-5 w-5" style={{ color }} aria-hidden />
           )}

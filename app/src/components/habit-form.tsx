@@ -189,15 +189,16 @@ export function HabitForm({
             </button>
           )}
         </div>
-        <div className="mt-1 flex max-h-28 flex-wrap gap-1 overflow-y-auto rounded-md border border-gray-200 p-2 dark:border-gray-800">
+        <div className="icon-picker-scroll mt-1 grid max-h-36 grid-cols-7 gap-1 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50/70 p-2 sm:grid-cols-9 dark:border-gray-800 dark:bg-gray-950/50">
           {filteredIcons.map((i) => (
             <button
               key={i.name}
               type="button"
-              aria-label={i.name}
+              aria-label={i.name.replaceAll("-", " ")}
+              title={i.name.replaceAll("-", " ")}
               aria-pressed={icon === i.name}
               onClick={() => setIcon(i.name)}
-              className={`flex h-8 w-8 items-center justify-center rounded-md ${
+              className={`flex aspect-square w-full items-center justify-center rounded-lg transition ${
                 icon === i.name
                   ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
                   : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
