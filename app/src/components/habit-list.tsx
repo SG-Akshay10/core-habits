@@ -486,7 +486,7 @@ export function HabitList({
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="flex w-full flex-col gap-4">
           {habits.map((habit) => (
             <HabitCard
               key={habit.id}
