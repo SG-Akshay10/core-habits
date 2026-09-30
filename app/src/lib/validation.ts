@@ -169,3 +169,29 @@ export const pushSubscriptionSchema = z.object({
   }),
 });
 
+export const importLogSchema = z.object({
+  date: z.string().refine(isValidDateString, { message: "Invalid date" }),
+  value: logValueSchema.optional().default(1),
+  note: logNoteSchema.nullable().optional(),
+});
+
+export const importHabitSchema = z.object({
+  name: habitNameSchema,
+  color: z.string().min(1),
+  icon: z.string().nullable().optional(),
+  type: habitTypeSchema.optional().default("build"),
+  description: z.string().nullable().optional(),
+  goalType: goalTypeSchema.optional().default("daily"),
+  goalCount: goalCountSchema.optional().default(1),
+  isNumeric: isNumericSchema.optional().default(false),
+  targetCount: targetCountSchema.optional().default(1),
+  unitLabel: z.string().nullable().optional(),
+  archivedAt: z.string().nullable().optional(),
+  logs: z.array(importLogSchema).max(5000).optional().default([]),
+});
+
+export const importPayloadSchema = z.object({
+  formatVersion: z.number().optional(),
+  exportedAt: z.string().optional(),
+  habits: z.array(importHabitSchema).min(1).max(200),
+});

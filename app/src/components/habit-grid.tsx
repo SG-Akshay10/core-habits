@@ -42,7 +42,9 @@ export function HabitGrid({
                 disabled={!clickable}
                 onClick={clickable ? () => onToggleDate!(date) : undefined}
                 title={`${date} — ${isLogged ? "logged" : "not logged"}`}
-                className={`aspect-square w-full rounded-[2px] ${
+                aria-label={`${date}, ${isFuture ? "future date" : isLogged ? "logged" : "not logged"}`}
+                aria-pressed={!isFuture ? isLogged : undefined}
+                className={`aspect-square w-full rounded-[2px] motion-reduce:transition-none ${
                   clickable ? "cursor-pointer hover:opacity-80" : ""
                 }`}
                 style={{
