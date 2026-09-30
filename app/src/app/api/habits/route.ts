@@ -17,7 +17,7 @@ export async function GET() {
     orderBy: { createdAt: "asc" },
     include: {
       logs: {
-        select: { date: true },
+        select: { date: true, value: true },
       },
     },
   });
@@ -29,8 +29,16 @@ export async function GET() {
       color: h.color,
       type: h.type,
       description: h.description,
+      goalType: h.goalType,
+      goalCount: h.goalCount,
+      isNumeric: h.isNumeric,
+      targetCount: h.targetCount,
+      unitLabel: h.unitLabel,
       createdAt: h.createdAt,
       logDates: h.logs.map((l: { date: string }) => l.date),
+      logValues: Object.fromEntries(
+        h.logs.map((l: { date: string; value: number }) => [l.date, l.value]),
+      ),
     })),
   });
 }
@@ -66,6 +74,11 @@ export async function POST(req: Request) {
       color: parsed.data.color,
       type: parsed.data.type,
       description: parsed.data.description,
+      goalType: parsed.data.goalType,
+      goalCount: parsed.data.goalCount,
+      isNumeric: parsed.data.isNumeric,
+      targetCount: parsed.data.targetCount,
+      unitLabel: parsed.data.unitLabel,
     },
   });
 
@@ -77,8 +90,14 @@ export async function POST(req: Request) {
         color: habit.color,
         type: habit.type,
         description: habit.description,
+        goalType: habit.goalType,
+        goalCount: habit.goalCount,
+        isNumeric: habit.isNumeric,
+        targetCount: habit.targetCount,
+        unitLabel: habit.unitLabel,
         createdAt: habit.createdAt,
         logDates: [] as string[],
+        logValues: {} as Record<string, number>,
       },
     },
     { status: 201 },

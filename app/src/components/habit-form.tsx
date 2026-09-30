@@ -7,6 +7,11 @@ export function HabitForm({
   initialName = "",
   initialColor = HABIT_COLORS[0],
   initialType = "build",
+  initialGoalType = "daily",
+  initialGoalCount = 1,
+  initialIsNumeric = false,
+  initialTargetCount = 1,
+  initialUnitLabel = "",
   submitLabel = "Add habit",
   pending = false,
   showType = false,
@@ -16,6 +21,11 @@ export function HabitForm({
   initialName?: string;
   initialColor?: string;
   initialType?: "build" | "quit";
+  initialGoalType?: "daily" | "weekly" | "monthly";
+  initialGoalCount?: number;
+  initialIsNumeric?: boolean;
+  initialTargetCount?: number;
+  initialUnitLabel?: string;
   submitLabel?: string;
   pending?: boolean;
   /** Show the build/quit selector — only meaningful on creation. */
@@ -24,12 +34,24 @@ export function HabitForm({
     name: string;
     color: string;
     type: "build" | "quit";
+    goalType: "daily" | "weekly" | "monthly";
+    goalCount: number;
+    isNumeric: boolean;
+    targetCount: number;
+    unitLabel: string;
   }) => void;
   onCancel: () => void;
 }) {
   const [name, setName] = useState(initialName);
   const [color, setColor] = useState(initialColor);
   const [type, setType] = useState<"build" | "quit">(initialType);
+  const [goalType, setGoalType] = useState<"daily" | "weekly" | "monthly">(
+    initialGoalType,
+  );
+  const [goalCount, setGoalCount] = useState(initialGoalCount);
+  const [isNumeric, setIsNumeric] = useState(initialIsNumeric);
+  const [targetCount, setTargetCount] = useState(initialTargetCount);
+  const [unitLabel, setUnitLabel] = useState(initialUnitLabel);
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(e: React.FormEvent) {
@@ -43,9 +65,27 @@ export function HabitForm({
       setError("Name must be 60 characters or fewer");
       return;
     }
+    if (goalType !== "daily" && (!Number.isInteger(goalCount) || goalCount < 1)) {
+      setError("Goal must be at least 1");
+      return;
+    }
+    if (isNumeric && (!Number.isInteger(targetCount) || targetCount < 1)) {
+      setError("Target must be at least 1");
+      return;
+    }
     setError(null);
-    onSubmit({ name: trimmed, color, type });
+    onSubmit({
+      name: trimmed,
+      color,
+      type,
+      goalType,
+      goalCount,
+      isNumeric,
+      targetCount,
+      unitLabel: unitLabel.trim(),
+    });
   }
+
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -118,6 +158,79 @@ export function HabitForm({
             />
           ))}
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium">Goal</span>
+        <div className="flex gap-2">
+          {(["daily", "weekly", "monthly"] as const).map((g) => (
+            <button
+              key={g}
+              type="button"
+              aria-pressed={goalType === g}
+              onClick={() => setGoalType(g)}
+              className={`flex-1 rounded-md border px-3 py-2 text-sm capitalize ${
+                goalType === g
+                  ? "border-gray-900 bg-gray-900 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900"
+                  : "border-gray-300 dark:border-gray-700"
+              }`}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+        {goalType !== "daily" && (
+          <div className="mt-2 flex items-center gap-2">
+            <label htmlFor="goal-count" className="text-sm text-gray-500">
+              Times per {goalType === "weekly" ? "week" : "month"}
+            </label>
+            <input
+              id="goal-count"
+              type="number"
+              min={1}
+              max={31}
+              value={goalCount}
+              onChange={(e) => setGoalCount(Number(e.target.value))}
+              className="w-20 rounded-md border border-gray-300 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={isNumeric}
+            onChange={(e) => setIsNumeric(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Track a number instead of a checkmark
+        </label>
+        {isNumeric && (
+          <div className="mt-2 flex items-center gap-2">
+            <label htmlFor="target-count" className="text-sm text-gray-500">
+              Target per day
+            </label>
+            <input
+              id="target-count"
+              type="number"
+              min={1}
+              max={1000}
+              value={targetCount}
+              onChange={(e) => setTargetCount(Number(e.target.value))}
+              className="w-20 rounded-md border border-gray-300 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+            />
+            <input
+              type="text"
+              placeholder="unit (e.g. glasses)"
+              maxLength={20}
+              value={unitLabel}
+              onChange={(e) => setUnitLabel(e.target.value)}
+              className="flex-1 rounded-md border border-gray-300 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-2">

@@ -17,13 +17,13 @@ export default async function HabitDetailPage({ params }: Params) {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { timezone: true },
+    select: { timezone: true, weekStartDay: true },
   });
   const today = todayInTimezone(user?.timezone ?? "UTC");
 
   const habit = await prisma.habit.findFirst({
     where: { id, userId: session.user.id },
-    include: { logs: { select: { date: true, note: true } } },
+    include: { logs: { select: { date: true, note: true, value: true } } },
   });
 
   if (!habit) {
@@ -38,7 +38,13 @@ export default async function HabitDetailPage({ params }: Params) {
         name={habit.name}
         color={habit.color}
         type={habit.type}
+        goalType={habit.goalType}
+        goalCount={habit.goalCount}
+        isNumeric={habit.isNumeric}
+        targetCount={habit.targetCount}
+        unitLabel={habit.unitLabel}
         today={today}
+        weekStartDay={user?.weekStartDay ?? 0}
         initialLogs={habit.logs}
       />
     </div>

@@ -46,11 +46,12 @@ export async function PUT(req: Request, { params }: Params) {
     );
   }
   const note = parsedBody.data.note ?? null;
+  const value = parsedBody.data.value ?? 1;
 
   await prisma.habitLog.upsert({
     where: { habitId_date: { habitId: id, date: parsedDate.data } },
-    create: { habitId: id, date: parsedDate.data, note },
-    update: { note },
+    create: { habitId: id, date: parsedDate.data, note, value },
+    update: { note, value },
   });
 
   return NextResponse.json({ ok: true });

@@ -11,15 +11,23 @@ export type HabitData = {
   name: string;
   color: string;
   type: "build" | "quit";
+  goalType: "daily" | "weekly" | "monthly";
+  goalCount: number;
+  isNumeric: boolean;
+  targetCount: number;
+  unitLabel: string | null;
   logDates: string[];
+  logValues: Record<string, number>;
 };
 
 export function HabitList({
   initialHabits,
   today,
+  weekStartDay,
 }: {
   initialHabits: HabitData[];
   today: string;
+  weekStartDay: number;
 }) {
   const [habits, setHabits] = useState(initialHabits);
   const [addOpen, setAddOpen] = useState(false);
@@ -41,6 +49,11 @@ export function HabitList({
     name: string;
     color: string;
     type: "build" | "quit";
+    goalType: "daily" | "weekly" | "monthly";
+    goalCount: number;
+    isNumeric: boolean;
+    targetCount: number;
+    unitLabel: string;
   }) {
     setAddPending(true);
     setAddError(null);
@@ -62,7 +75,13 @@ export function HabitList({
           name: habit.name,
           color: habit.color,
           type: habit.type,
+          goalType: habit.goalType,
+          goalCount: habit.goalCount,
+          isNumeric: habit.isNumeric,
+          targetCount: habit.targetCount,
+          unitLabel: habit.unitLabel,
           logDates: [],
+          logValues: {},
         },
       ]);
       setAddOpen(false);
@@ -77,6 +96,11 @@ export function HabitList({
     name: string;
     color: string;
     type?: "build" | "quit";
+    goalType?: "daily" | "weekly" | "monthly";
+    goalCount?: number;
+    isNumeric?: boolean;
+    targetCount?: number;
+    unitLabel?: string;
   }) {
     if (!editingId) return;
     setEditPending(true);
@@ -165,6 +189,60 @@ export function HabitList({
     }
   }
 
+  async function handleSetValue(habitId: string, value: number) {
+    const habit = habits.find((h) => h.id === habitId);
+    if (!habit) return;
+    const prevLogDates = habit.logDates;
+    const prevLogValues = habit.logValues;
+
+    // Optimistic update.
+    setHabits((prev) =>
+      prev.map((h) =>
+        h.id === habitId
+          ? {
+              ...h,
+              logDates: value > 0
+                ? Array.from(new Set([...h.logDates, today]))
+                : h.logDates.filter((d) => d !== today),
+              logValues:
+                value > 0
+                  ? { ...h.logValues, [today]: value }
+                  : Object.fromEntries(
+                      Object.entries(h.logValues).filter(([d]) => d !== today),
+                    ),
+            }
+          : h,
+      ),
+    );
+
+    try {
+      const res =
+        value > 0
+          ? await fetch(
+              `/api/habits/${habitId}/logs/${encodeURIComponent(today)}`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ value }),
+              },
+            )
+          : await fetch(
+              `/api/habits/${habitId}/logs/${encodeURIComponent(today)}`,
+              { method: "DELETE" },
+            );
+      if (!res.ok) throw new Error("failed");
+    } catch {
+      // Rollback on failure.
+      setHabits((prev) =>
+        prev.map((h) =>
+          h.id === habitId
+            ? { ...h, logDates: prevLogDates, logValues: prevLogValues }
+            : h,
+        ),
+      );
+    }
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-10">
       <div className="flex items-center justify-between">
@@ -200,10 +278,18 @@ export function HabitList({
               name={habit.name}
               color={habit.color}
               type={habit.type}
+              goalType={habit.goalType}
+              goalCount={habit.goalCount}
+              isNumeric={habit.isNumeric}
+              targetCount={habit.targetCount}
+              unitLabel={habit.unitLabel}
               logDates={new Set(habit.logDates)}
+              logValue={habit.logValues[today] ?? 0}
               today={today}
+              weekStartDay={weekStartDay}
               isLoggedToday={habit.logDates.includes(today)}
               onToggleToday={() => handleToggleToday(habit.id)}
+              onSetValue={(value) => handleSetValue(habit.id, value)}
               onEdit={() => setEditingId(habit.id)}
               onDelete={() => setDeletingId(habit.id)}
             />
@@ -234,6 +320,11 @@ export function HabitList({
             initialName={editingHabit.name}
             initialColor={editingHabit.color}
             initialType={editingHabit.type}
+            initialGoalType={editingHabit.goalType}
+            initialGoalCount={editingHabit.goalCount}
+            initialIsNumeric={editingHabit.isNumeric}
+            initialTargetCount={editingHabit.targetCount}
+            initialUnitLabel={editingHabit.unitLabel ?? ""}
             submitLabel="Save"
             pending={editPending}
             showType
