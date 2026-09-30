@@ -1,11 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { HabitGrid } from "@/components/habit-grid";
+import { StreakChips } from "@/components/streak-chips";
+import { calculateStreak } from "@/lib/streak";
 
 export function HabitCard({
+  id,
   name,
   color,
+  type,
   logDates,
   today,
   isLoggedToday,
@@ -16,6 +21,7 @@ export function HabitCard({
   id: string;
   name: string;
   color: string;
+  type: "build" | "quit";
   logDates: Set<string>;
   today: string;
   isLoggedToday: boolean;
@@ -24,26 +30,31 @@ export function HabitCard({
   onDelete: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const streak = calculateStreak([...logDates], today);
+  const doneLabel = type === "quit" ? "Clean today" : "Log today";
+  const undoLabel =
+    type === "quit" ? "Undo today's clean day" : "Undo today's log";
 
   return (
     <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
+        <Link
+          href={`/habits/${id}`}
+          className="flex min-w-0 items-center gap-2 hover:underline"
+        >
           <span
             className="h-3 w-3 shrink-0 rounded-full"
             style={{ backgroundColor: color }}
           />
           <h3 className="truncate font-medium">{name}</h3>
-        </div>
+        </Link>
 
         <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={onToggleToday}
             aria-pressed={isLoggedToday}
-            title={
-              isLoggedToday ? "Undo today's log" : "Log today"
-            }
+            title={isLoggedToday ? undoLabel : doneLabel}
             className="flex h-9 w-9 items-center justify-center rounded-full border text-lg transition"
             style={{
               backgroundColor: isLoggedToday ? color : "transparent",
@@ -94,7 +105,12 @@ export function HabitCard({
         </div>
       </div>
 
+      <div className="mb-3">
+        <StreakChips current={streak.current} longest={streak.longest} />
+      </div>
+
       <HabitGrid color={color} logDates={logDates} today={today} />
     </div>
   );
 }
+

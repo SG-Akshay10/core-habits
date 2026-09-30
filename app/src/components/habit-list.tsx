@@ -10,6 +10,7 @@ export type HabitData = {
   id: string;
   name: string;
   color: string;
+  type: "build" | "quit";
   logDates: string[];
 };
 
@@ -36,7 +37,11 @@ export function HabitList({
     [habits, editingId],
   );
 
-  async function handleCreate(values: { name: string; color: string }) {
+  async function handleCreate(values: {
+    name: string;
+    color: string;
+    type: "build" | "quit";
+  }) {
     setAddPending(true);
     setAddError(null);
     try {
@@ -52,7 +57,13 @@ export function HabitList({
       const { habit } = await res.json();
       setHabits((prev) => [
         ...prev,
-        { id: habit.id, name: habit.name, color: habit.color, logDates: [] },
+        {
+          id: habit.id,
+          name: habit.name,
+          color: habit.color,
+          type: habit.type,
+          logDates: [],
+        },
       ]);
       setAddOpen(false);
     } catch {
@@ -62,7 +73,11 @@ export function HabitList({
     }
   }
 
-  async function handleEdit(values: { name: string; color: string }) {
+  async function handleEdit(values: {
+    name: string;
+    color: string;
+    type?: "build" | "quit";
+  }) {
     if (!editingId) return;
     setEditPending(true);
     const prevHabits = habits;
@@ -184,6 +199,7 @@ export function HabitList({
               id={habit.id}
               name={habit.name}
               color={habit.color}
+              type={habit.type}
               logDates={new Set(habit.logDates)}
               today={today}
               isLoggedToday={habit.logDates.includes(today)}
@@ -202,6 +218,7 @@ export function HabitList({
         <HabitForm
           submitLabel="Add habit"
           pending={addPending}
+          showType
           onSubmit={handleCreate}
           onCancel={() => setAddOpen(false)}
         />
@@ -216,8 +233,10 @@ export function HabitList({
           <HabitForm
             initialName={editingHabit.name}
             initialColor={editingHabit.color}
+            initialType={editingHabit.type}
             submitLabel="Save"
             pending={editPending}
+            showType
             onSubmit={handleEdit}
             onCancel={() => setEditingId(null)}
           />

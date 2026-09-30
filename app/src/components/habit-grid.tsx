@@ -13,10 +13,13 @@ export function HabitGrid({
   color,
   logDates,
   today,
+  onToggleDate,
 }: {
   color: string;
   logDates: Set<string>;
   today: string;
+  /** When provided, past/today cells become clickable to toggle their log. */
+  onToggleDate?: (date: string) => void;
 }) {
   const columns = buildGridDates(today, 53);
 
@@ -31,11 +34,17 @@ export function HabitGrid({
           {column.map((date) => {
             const isFuture = date > today;
             const isLogged = logDates.has(date);
+            const clickable = !isFuture && !!onToggleDate;
             return (
-              <div
+              <button
                 key={date}
+                type="button"
+                disabled={!clickable}
+                onClick={clickable ? () => onToggleDate!(date) : undefined}
                 title={`${date} — ${isLogged ? "logged" : "not logged"}`}
-                className="aspect-square w-full rounded-[2px]"
+                className={`aspect-square w-full rounded-[2px] ${
+                  clickable ? "cursor-pointer hover:opacity-80" : ""
+                }`}
                 style={{
                   backgroundColor: isFuture
                     ? "transparent"
