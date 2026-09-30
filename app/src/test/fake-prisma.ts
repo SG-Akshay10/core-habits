@@ -9,6 +9,7 @@ type FakeLog = {
   habitId: string;
   date: string;
   note?: string | null;
+  value?: number;
   createdAt: Date;
 };
 type FakeHabit = {
@@ -18,6 +19,11 @@ type FakeHabit = {
   color: string;
   type: "build" | "quit";
   description: string | null;
+  goalType: "daily" | "weekly" | "monthly";
+  goalCount: number;
+  isNumeric: boolean;
+  targetCount: number;
+  unitLabel: string | null;
   createdAt: Date;
   logs: FakeLog[];
 };
@@ -38,6 +44,11 @@ export function seedHabit(overrides: Partial<FakeHabit> = {}): FakeHabit {
     color: overrides.color ?? "#3b82f6",
     type: overrides.type ?? "build",
     description: overrides.description ?? null,
+    goalType: overrides.goalType ?? "daily",
+    goalCount: overrides.goalCount ?? 1,
+    isNumeric: overrides.isNumeric ?? false,
+    targetCount: overrides.targetCount ?? 1,
+    unitLabel: overrides.unitLabel ?? null,
     createdAt: overrides.createdAt ?? new Date(),
     logs: overrides.logs ?? [],
   };
@@ -47,7 +58,14 @@ export function seedHabit(overrides: Partial<FakeHabit> = {}): FakeHabit {
 
 function stripLogs(h: FakeHabit) {
   const { logs, ...rest } = h;
-  return { ...rest, logs: logs.map((l) => ({ date: l.date, note: l.note ?? null })) };
+  return {
+    ...rest,
+    logs: logs.map((l) => ({
+      date: l.date,
+      note: l.note ?? null,
+      value: l.value ?? 1,
+    })),
+  };
 }
 
 export const fakePrisma = {
@@ -75,6 +93,11 @@ export const fakePrisma = {
           color: string;
           type?: "build" | "quit";
           description?: string;
+          goalType?: "daily" | "weekly" | "monthly";
+          goalCount?: number;
+          isNumeric?: boolean;
+          targetCount?: number;
+          unitLabel?: string | null;
         };
       }) => {
         const habit: FakeHabit = {
@@ -84,6 +107,11 @@ export const fakePrisma = {
           color: data.color,
           type: data.type ?? "build",
           description: data.description ?? null,
+          goalType: data.goalType ?? "daily",
+          goalCount: data.goalCount ?? 1,
+          isNumeric: data.isNumeric ?? false,
+          targetCount: data.targetCount ?? 1,
+          unitLabel: data.unitLabel ?? null,
           createdAt: new Date(),
           logs: [],
         };
@@ -102,6 +130,11 @@ export const fakePrisma = {
           color: string;
           type: "build" | "quit";
           description: string;
+          goalType: "daily" | "weekly" | "monthly";
+          goalCount: number;
+          isNumeric: boolean;
+          targetCount: number;
+          unitLabel: string | null;
         }>;
       }) => {
         const h = habits.find((x) => x.id === where.id);
@@ -110,12 +143,22 @@ export const fakePrisma = {
         if (data.color !== undefined) h.color = data.color;
         if (data.type !== undefined) h.type = data.type;
         if (data.description !== undefined) h.description = data.description;
+        if (data.goalType !== undefined) h.goalType = data.goalType;
+        if (data.goalCount !== undefined) h.goalCount = data.goalCount;
+        if (data.isNumeric !== undefined) h.isNumeric = data.isNumeric;
+        if (data.targetCount !== undefined) h.targetCount = data.targetCount;
+        if (data.unitLabel !== undefined) h.unitLabel = data.unitLabel;
         return {
           id: h.id,
           name: h.name,
           color: h.color,
           type: h.type,
           description: h.description,
+          goalType: h.goalType,
+          goalCount: h.goalCount,
+          isNumeric: h.isNumeric,
+          targetCount: h.targetCount,
+          unitLabel: h.unitLabel,
         };
       },
     ),
@@ -134,8 +177,8 @@ export const fakePrisma = {
         update,
       }: {
         where: { habitId_date: { habitId: string; date: string } };
-        create?: { note?: string | null };
-        update?: { note?: string | null };
+        create?: { note?: string | null; value?: number };
+        update?: { note?: string | null; value?: number };
       }) => {
         const { habitId, date } = where.habitId_date;
         const habit = habits.find((h) => h.id === habitId);
@@ -147,11 +190,13 @@ export const fakePrisma = {
             habitId,
             date,
             note: create?.note ?? null,
+            value: create?.value ?? 1,
             createdAt: new Date(),
           };
           habit.logs.push(log);
-        } else if (update?.note !== undefined) {
-          log.note = update.note;
+        } else {
+          if (update?.note !== undefined) log.note = update.note;
+          if (update?.value !== undefined) log.value = update.value;
         }
         return log;
       },

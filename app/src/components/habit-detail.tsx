@@ -5,27 +5,45 @@ import Link from "next/link";
 import { HabitGrid } from "@/components/habit-grid";
 import { HabitCalendar } from "@/components/habit-calendar";
 import { StreakChips } from "@/components/streak-chips";
+import { GoalChip } from "@/components/goal-chip";
+import { StatsPanel } from "@/components/stats-panel";
 import { calculateStreak } from "@/lib/streak";
+import { calculateWeekStreak } from "@/lib/goals";
 
-export type LogEntry = { date: string; note: string | null };
+export type LogEntry = { date: string; note: string | null; value?: number };
 
 export function HabitDetail({
   habitId,
   name,
   color,
   type,
+  goalType,
+  goalCount,
+  isNumeric,
+  targetCount,
+  unitLabel,
   today,
+  weekStartDay,
   initialLogs,
 }: {
   habitId: string;
   name: string;
   color: string;
   type: "build" | "quit";
+  goalType: "daily" | "weekly" | "monthly";
+  goalCount: number;
+  isNumeric: boolean;
+  targetCount: number;
+  unitLabel: string | null;
   today: string;
+  weekStartDay: number;
   initialLogs: LogEntry[];
 }) {
   const [logs, setLogs] = useState<Map<string, string | null>>(
     () => new Map(initialLogs.map((l) => [l.date, l.note])),
+  );
+  const [values, setValues] = useState<Map<string, number>>(
+    () => new Map(initialLogs.map((l) => [l.date, l.value ?? 1])),
   );
   const [month, setMonth] = useState(() => today.slice(0, 7));
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -34,10 +52,18 @@ export function HabitDetail({
   const [pendingDates, setPendingDates] = useState<Set<string>>(new Set());
 
   const logDates = useMemo(() => new Set(logs.keys()), [logs]);
-  const streak = useMemo(
-    () => calculateStreak([...logDates], today),
-    [logDates, today],
+  const goal = useMemo(
+    () => ({ goalType, goalCount }),
+    [goalType, goalCount],
   );
+  const streak = useMemo(
+    () =>
+      goalType === "weekly"
+        ? calculateWeekStreak(goal, [...logDates], today, weekStartDay)
+        : calculateStreak([...logDates], today),
+    [logDates, today, goalType, goal, weekStartDay],
+  );
+
 
   const doneWord = type === "quit" ? "Clean" : "Done";
   const doneWordLower = type === "quit" ? "stayed clean" : "logged";
@@ -108,6 +134,45 @@ export function HabitDetail({
     }
   }
 
+  async function setTodayValue(value: number) {
+    const prevLogs = logs;
+    const prevValues = values;
+
+    setLogs((prev) => {
+      const next = new Map(prev);
+      if (value > 0) next.set(today, next.get(today) ?? null);
+      else next.delete(today);
+      return next;
+    });
+    setValues((prev) => {
+      const next = new Map(prev);
+      if (value > 0) next.set(today, value);
+      else next.delete(today);
+      return next;
+    });
+
+    try {
+      const res =
+        value > 0
+          ? await fetch(
+              `/api/habits/${habitId}/logs/${encodeURIComponent(today)}`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ value }),
+              },
+            )
+          : await fetch(
+              `/api/habits/${habitId}/logs/${encodeURIComponent(today)}`,
+              { method: "DELETE" },
+            );
+      if (!res.ok) throw new Error("failed");
+    } catch {
+      setLogs(prevLogs);
+      setValues(prevValues);
+    }
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-10">
       <div>
@@ -132,6 +197,59 @@ export function HabitDetail({
         </div>
         <StreakChips current={streak.current} longest={streak.longest} />
       </div>
+
+      {goalType !== "daily" && (
+        <div>
+          <GoalChip
+            goal={goal}
+            logDates={[...logDates]}
+            today={today}
+            weekStartDay={weekStartDay}
+          />
+        </div>
+      )}
+
+      {isNumeric && (
+        <section className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+          <h2 className="mb-3 text-sm font-medium text-gray-500">Today</h2>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setTodayValue(Math.max(0, (values.get(today) ?? 0) - 1))}
+              aria-label="Decrease"
+              className="flex h-9 w-9 items-center justify-center rounded-full border text-lg"
+              style={{ borderColor: color, color }}
+            >
+              −
+            </button>
+            <span className="min-w-[5rem] text-center text-lg font-medium tabular-nums">
+              {values.get(today) ?? 0} / {targetCount}
+            </span>
+            <button
+              type="button"
+              onClick={() => setTodayValue((values.get(today) ?? 0) + 1)}
+              aria-label="Increase"
+              className="flex h-9 w-9 items-center justify-center rounded-full border text-lg"
+              style={{
+                backgroundColor:
+                  (values.get(today) ?? 0) >= targetCount ? color : "transparent",
+                borderColor: color,
+                color: (values.get(today) ?? 0) >= targetCount ? "#fff" : color,
+              }}
+            >
+              +
+            </button>
+            {unitLabel && (
+              <span className="text-sm text-gray-500">{unitLabel}</span>
+            )}
+          </div>
+        </section>
+      )}
+
+      <section className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+        <h2 className="mb-3 text-sm font-medium text-gray-500">Stats</h2>
+        <StatsPanel habitId={habitId} color={color} />
+      </section>
 
       <section className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
         <h2 className="mb-3 text-sm font-medium text-gray-500">Full year</h2>

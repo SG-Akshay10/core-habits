@@ -21,7 +21,7 @@ export async function GET(_req: Request, { params }: Params) {
   const { id } = await params;
   const habit = await prisma.habit.findFirst({
     where: { id, userId: session.user.id },
-    include: { logs: { select: { date: true, note: true } } },
+    include: { logs: { select: { date: true, note: true, value: true } } },
   });
   if (!habit) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -34,6 +34,11 @@ export async function GET(_req: Request, { params }: Params) {
       color: habit.color,
       type: habit.type,
       description: habit.description,
+      goalType: habit.goalType,
+      goalCount: habit.goalCount,
+      isNumeric: habit.isNumeric,
+      targetCount: habit.targetCount,
+      unitLabel: habit.unitLabel,
       createdAt: habit.createdAt,
       logs: habit.logs,
     },
@@ -81,6 +86,21 @@ export async function PATCH(req: Request, { params }: Params) {
       ...(parsed.data.description !== undefined
         ? { description: parsed.data.description }
         : {}),
+      ...(parsed.data.goalType !== undefined
+        ? { goalType: parsed.data.goalType }
+        : {}),
+      ...(parsed.data.goalCount !== undefined
+        ? { goalCount: parsed.data.goalCount }
+        : {}),
+      ...(parsed.data.isNumeric !== undefined
+        ? { isNumeric: parsed.data.isNumeric }
+        : {}),
+      ...(parsed.data.targetCount !== undefined
+        ? { targetCount: parsed.data.targetCount }
+        : {}),
+      ...(parsed.data.unitLabel !== undefined
+        ? { unitLabel: parsed.data.unitLabel }
+        : {}),
     },
   });
 
@@ -91,6 +111,11 @@ export async function PATCH(req: Request, { params }: Params) {
       color: habit.color,
       type: habit.type,
       description: habit.description,
+      goalType: habit.goalType,
+      goalCount: habit.goalCount,
+      isNumeric: habit.isNumeric,
+      targetCount: habit.targetCount,
+      unitLabel: habit.unitLabel,
     },
   });
 }
