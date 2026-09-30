@@ -1,26 +1,42 @@
 import { auth } from "@/auth";
 import { TopBar } from "@/components/top-bar";
 import { TimezoneSync } from "@/components/timezone-sync";
+import { HabitList } from "@/components/habit-list";
+import { prisma } from "@/lib/prisma";
+import { todayInTimezone } from "@/lib/date";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect("/");
   }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { timezone: true },
+  });
+  const today = todayInTimezone(user?.timezone ?? "UTC");
+
+  const habits = await prisma.habit.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "asc" },
+    include: { logs: { select: { date: true } } },
+  });
 
   return (
     <div className="min-h-screen">
       <TimezoneSync />
       <TopBar userName={session.user.name} userImage={session.user.image} />
-      <main className="flex flex-col items-center justify-center gap-3 px-6 py-24 text-center">
-        <h1 className="text-2xl font-semibold">
-          Welcome, {session.user.name?.split(" ")[0]}
-        </h1>
-        <p className="max-w-md text-gray-500">
-          Your dashboard is empty for now — habit creation ships in Week 2.
-        </p>
-      </main>
+      <HabitList
+        today={today}
+        initialHabits={habits.map((h) => ({
+          id: h.id,
+          name: h.name,
+          color: h.color,
+          logDates: h.logs.map((l) => l.date),
+        }))}
+      />
     </div>
   );
 }
