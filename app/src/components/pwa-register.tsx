@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { syncQueuedRequests } from "@/lib/offline-queue";
 
 type BeforeInstallPromptEvent = Event & {
@@ -79,9 +80,9 @@ export function PwaRegister() {
           type="button"
           onClick={() => setInstallEvent(null)}
           aria-label="Dismiss"
-          className="text-gray-400 hover:text-gray-600"
+          className="flex h-6 w-6 items-center justify-center text-gray-400 hover:text-gray-600"
         >
-          ✕
+          <X className="h-4 w-4" />
         </button>
       </div>
     </div>

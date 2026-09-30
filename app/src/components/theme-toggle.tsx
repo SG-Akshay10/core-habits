@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { Sun, Moon, Monitor } from "lucide-react";
 import type { Theme } from "@/lib/theme";
 import { applyTheme } from "@/lib/theme";
 
-const OPTIONS: { value: Theme; label: string; icon: string }[] = [
-  { value: "light", label: "Light", icon: "☀️" },
-  { value: "dark", label: "Dark", icon: "🌙" },
-  { value: "system", label: "System", icon: "💻" },
+const OPTIONS: { value: Theme; label: string; Icon: typeof Sun }[] = [
+  { value: "light", label: "Light", Icon: Sun },
+  { value: "dark", label: "Dark", Icon: Moon },
+  { value: "system", label: "System", Icon: Monitor },
 ];
 
 /**
@@ -38,13 +39,13 @@ export function ThemeToggle({ initialTheme }: { initialTheme: Theme }) {
           aria-label={`${opt.label} theme`}
           aria-pressed={theme === opt.value}
           onClick={() => handleChange(opt.value)}
-          className={`flex h-7 w-7 items-center justify-center rounded-full text-sm ${
+          className={`flex h-7 w-7 items-center justify-center rounded-full ${
             theme === opt.value
               ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
-              : "hover:bg-gray-100 dark:hover:bg-gray-800"
+              : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
           }`}
         >
-          {opt.icon}
+          <opt.Icon className="h-3.5 w-3.5" />
         </button>
       ))}
     </div>

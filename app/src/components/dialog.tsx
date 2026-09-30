@@ -1,5 +1,7 @@
 "use client";
 
+import { X } from "lucide-react";
+
 /** Generic centered modal dialog with a backdrop. */
 export function Dialog({
   open,
@@ -16,7 +18,7 @@ export function Dialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
@@ -24,9 +26,19 @@ export function Dialog({
         aria-modal="true"
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900"
+        className="card-surface w-full max-w-md rounded-2xl p-6 shadow-xl"
       >
-        <h2 className="mb-4 text-lg font-semibold">{title}</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close dialog"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+          >
+            <X className="h-4.5 w-4.5" />
+          </button>
+        </div>
         {children}
       </div>
     </div>

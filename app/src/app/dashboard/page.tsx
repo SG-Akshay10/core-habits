@@ -35,14 +35,14 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[var(--background)]">
       <TimezoneSync />
       <TopBar
         userName={session.user.name}
         userImage={session.user.image}
         theme={(user?.theme as "light" | "dark" | "system") ?? "system"}
       />
-      <div className="mx-auto w-full max-w-2xl px-6 pt-10">
+      <div className="mx-auto w-full max-w-6xl px-6 pt-8">
         <OverviewStatsBar stats={overview} />
       </div>
       <HabitList

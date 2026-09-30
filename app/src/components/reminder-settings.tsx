@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { subscribeToPush } from "@/lib/push-client";
 
 type Reminder = {
@@ -150,9 +151,9 @@ export function ReminderSettings({ habitId }: { habitId: string }) {
                   type="button"
                   onClick={() => handleDelete(r.id)}
                   aria-label="Delete reminder"
-                  className="text-gray-400 hover:text-red-600"
+                  className="flex h-6 w-6 items-center justify-center text-gray-400 hover:text-red-600"
                 >
-                  ✕
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             </li>

@@ -2,12 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import {
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
+  MoreVertical,
+  Minus,
+  Plus,
+  Check,
+} from "lucide-react";
 import { HabitGrid } from "@/components/habit-grid";
 import { StreakChips } from "@/components/streak-chips";
 import { GoalChip } from "@/components/goal-chip";
 import { calculateStreak } from "@/lib/streak";
 import { calculateWeekStreak } from "@/lib/goals";
-import { habitIconEmoji } from "@/lib/icons";
+import { getHabitIcon } from "@/lib/icons";
 
 export function HabitCard({
   id,
@@ -81,10 +90,11 @@ export function HabitCard({
   const doneLabel = type === "quit" ? "Clean today" : "Log today";
   const undoLabel =
     type === "quit" ? "Undo today's clean day" : "Undo today's log";
+  const Icon = getHabitIcon(icon);
 
   return (
     <div
-      className="rounded-lg border border-gray-200 p-4 dark:border-gray-800"
+      className="card-surface rounded-2xl p-4 shadow-sm transition hover:shadow-md"
       draggable={draggable}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
@@ -95,11 +105,11 @@ export function HabitCard({
         <div className="flex min-w-0 items-center gap-1">
           {draggable && (
             <span
-              className="cursor-grab select-none px-1 text-gray-400"
+              className="cursor-grab select-none text-gray-400"
               aria-hidden
               title="Drag to reorder"
             >
-              ⠿
+              <GripVertical className="h-4 w-4" />
             </span>
           )}
           {(onMoveUp || onMoveDown) && (
@@ -111,7 +121,7 @@ export function HabitCard({
                 onClick={onMoveUp}
                 className="leading-none text-gray-400 hover:text-gray-700 disabled:opacity-20 dark:hover:text-gray-200"
               >
-                ▲
+                <ChevronUp className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
@@ -120,20 +130,29 @@ export function HabitCard({
                 onClick={onMoveDown}
                 className="leading-none text-gray-400 hover:text-gray-700 disabled:opacity-20 dark:hover:text-gray-200"
               >
-                ▼
+                <ChevronDown className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
           <Link
             href={`/habits/${id}`}
-            className="flex min-w-0 items-center gap-2 hover:underline"
+            className="flex min-w-0 items-center gap-2.5 hover:opacity-80"
           >
             <span
-              className="h-3 w-3 shrink-0 rounded-full"
-              style={{ backgroundColor: color }}
-            />
-            {icon && <span aria-hidden>{habitIconEmoji(icon)}</span>}
-            <h3 className="truncate font-medium">{name}</h3>
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-sm"
+              style={{ backgroundColor: `${color}22`, color }}
+              aria-hidden
+            >
+              {Icon ? (
+                <Icon className="h-4.5 w-4.5" strokeWidth={2.25} />
+              ) : (
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+              )}
+            </span>
+            <h3 className="truncate font-semibold">{name}</h3>
           </Link>
         </div>
 
@@ -144,13 +163,13 @@ export function HabitCard({
                 type="button"
                 onClick={() => onSetValue(Math.max(0, logValue - 1))}
                 aria-label="Decrease"
-                className="flex h-8 w-8 items-center justify-center rounded-full border text-sm"
+                className="flex h-8 w-8 items-center justify-center rounded-full border-2"
                 style={{ borderColor: color, color }}
               >
-                −
+                <Minus className="h-4 w-4" />
               </button>
               <span
-                className="min-w-[3rem] text-center text-sm font-medium tabular-nums"
+                className="min-w-[3rem] text-center text-sm font-semibold tabular-nums"
                 title={`${logValue} of ${targetCount}${unitLabel ? ` ${unitLabel}` : ""}`}
               >
                 {logValue}/{targetCount}
@@ -159,14 +178,14 @@ export function HabitCard({
                 type="button"
                 onClick={() => onSetValue(logValue + 1)}
                 aria-label="Increase"
-                className="flex h-8 w-8 items-center justify-center rounded-full border text-sm"
+                className="flex h-8 w-8 items-center justify-center rounded-full border-2 shadow-sm"
                 style={{
                   backgroundColor: logValue >= targetCount ? color : "transparent",
                   borderColor: color,
                   color: logValue >= targetCount ? "#fff" : color,
                 }}
               >
-                +
+                <Plus className="h-4 w-4" />
               </button>
             </div>
           ) : (
@@ -175,14 +194,14 @@ export function HabitCard({
               onClick={onToggleToday}
               aria-pressed={isLoggedToday}
               title={isLoggedToday ? undoLabel : doneLabel}
-              className="flex h-9 w-9 items-center justify-center rounded-full border text-lg transition"
+              className="flex h-10 w-10 items-center justify-center rounded-full border-2 shadow-sm transition active:scale-95"
               style={{
                 backgroundColor: isLoggedToday ? color : "transparent",
                 borderColor: color,
                 color: isLoggedToday ? "#fff" : color,
               }}
             >
-              {isLoggedToday ? "✓" : "+"}
+              {isLoggedToday && <Check className="h-5 w-5" strokeWidth={3} />}
             </button>
           )}
 
@@ -191,13 +210,13 @@ export function HabitCard({
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Habit options"
-              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              ⋮
+              <MoreVertical className="h-4.5 w-4.5" />
             </button>
             {menuOpen && (
               <div
-                className="absolute right-0 z-10 mt-1 w-32 rounded-md border border-gray-200 bg-white py-1 text-sm shadow-lg dark:border-gray-700 dark:bg-gray-900"
+                className="card-surface absolute right-0 z-10 mt-1 w-32 rounded-xl py-1 text-sm shadow-lg"
                 onMouseLeave={() => setMenuOpen(false)}
               >
                 <button
