@@ -16,14 +16,19 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { timezone: true, weekStartDay: true },
+    select: { timezone: true, weekStartDay: true, theme: true, defaultView: true },
   });
   const today = todayInTimezone(user?.timezone ?? "UTC");
 
-  const [habits, overview] = await Promise.all([
+  const [habits, archivedHabits, overview] = await Promise.all([
     prisma.habit.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "asc" },
+      where: { userId: session.user.id, archivedAt: null },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      include: { logs: { select: { date: true, value: true } } },
+    }),
+    prisma.habit.findMany({
+      where: { userId: session.user.id, archivedAt: { not: null } },
+      orderBy: { archivedAt: "desc" },
       include: { logs: { select: { date: true, value: true } } },
     }),
     computeOverviewStats(session.user.id, today),
@@ -32,17 +37,41 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen">
       <TimezoneSync />
-      <TopBar userName={session.user.name} userImage={session.user.image} />
+      <TopBar
+        userName={session.user.name}
+        userImage={session.user.image}
+        theme={(user?.theme as "light" | "dark" | "system") ?? "system"}
+      />
       <div className="mx-auto w-full max-w-2xl px-6 pt-10">
         <OverviewStatsBar stats={overview} />
       </div>
       <HabitList
         today={today}
         weekStartDay={user?.weekStartDay ?? 0}
+        initialView={
+          (user?.defaultView as "cards" | "checklist" | "compact") ?? "cards"
+        }
         initialHabits={habits.map((h) => ({
           id: h.id,
           name: h.name,
           color: h.color,
+          icon: h.icon,
+          type: h.type,
+          goalType: h.goalType,
+          goalCount: h.goalCount,
+          isNumeric: h.isNumeric,
+          targetCount: h.targetCount,
+          unitLabel: h.unitLabel,
+          logDates: h.logs.map((l) => l.date),
+          logValues: Object.fromEntries(
+            h.logs.map((l) => [l.date, l.value]),
+          ),
+        }))}
+        initialArchivedHabits={archivedHabits.map((h) => ({
+          id: h.id,
+          name: h.name,
+          color: h.color,
+          icon: h.icon,
           type: h.type,
           goalType: h.goalType,
           goalCount: h.goalCount,

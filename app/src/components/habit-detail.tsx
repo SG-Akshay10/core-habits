@@ -9,6 +9,7 @@ import { GoalChip } from "@/components/goal-chip";
 import { StatsPanel } from "@/components/stats-panel";
 import { calculateStreak } from "@/lib/streak";
 import { calculateWeekStreak } from "@/lib/goals";
+import { habitIconEmoji } from "@/lib/icons";
 
 export type LogEntry = { date: string; note: string | null; value?: number };
 
@@ -16,6 +17,7 @@ export function HabitDetail({
   habitId,
   name,
   color,
+  icon,
   type,
   goalType,
   goalCount,
@@ -29,6 +31,7 @@ export function HabitDetail({
   habitId: string;
   name: string;
   color: string;
+  icon?: string | null;
   type: "build" | "quit";
   goalType: "daily" | "weekly" | "monthly";
   goalCount: number;
@@ -190,6 +193,7 @@ export function HabitDetail({
             className="h-4 w-4 shrink-0 rounded-full"
             style={{ backgroundColor: color }}
           />
+          {icon && <span aria-hidden>{habitIconEmoji(icon)}</span>}
           <h1 className="text-xl font-semibold">{name}</h1>
           <span className="rounded-full border border-gray-300 px-2 py-0.5 text-xs text-gray-500 dark:border-gray-700">
             {type === "quit" ? "Quitting" : "Building"}

@@ -17,6 +17,7 @@ type FakeHabit = {
   userId: string;
   name: string;
   color: string;
+  icon: string | null;
   type: "build" | "quit";
   description: string | null;
   goalType: "daily" | "weekly" | "monthly";
@@ -24,6 +25,8 @@ type FakeHabit = {
   isNumeric: boolean;
   targetCount: number;
   unitLabel: string | null;
+  sortOrder: number;
+  archivedAt: Date | null;
   createdAt: Date;
   logs: FakeLog[];
 };
@@ -42,6 +45,7 @@ export function seedHabit(overrides: Partial<FakeHabit> = {}): FakeHabit {
     userId: overrides.userId ?? "user_1",
     name: overrides.name ?? "Read",
     color: overrides.color ?? "#3b82f6",
+    icon: overrides.icon ?? null,
     type: overrides.type ?? "build",
     description: overrides.description ?? null,
     goalType: overrides.goalType ?? "daily",
@@ -49,6 +53,8 @@ export function seedHabit(overrides: Partial<FakeHabit> = {}): FakeHabit {
     isNumeric: overrides.isNumeric ?? false,
     targetCount: overrides.targetCount ?? 1,
     unitLabel: overrides.unitLabel ?? null,
+    sortOrder: overrides.sortOrder ?? 0,
+    archivedAt: overrides.archivedAt ?? null,
     createdAt: overrides.createdAt ?? new Date(),
     logs: overrides.logs ?? [],
   };
@@ -70,11 +76,28 @@ function stripLogs(h: FakeHabit) {
 
 export const fakePrisma = {
   habit: {
-    findMany: vi.fn(async ({ where }: { where: { userId: string } }) => {
-      return habits
-        .filter((h) => h.userId === where.userId)
-        .map(stripLogs);
-    }),
+    findMany: vi.fn(
+      async ({
+        where,
+      }: {
+        where: { userId: string; archivedAt?: null | { not: null } };
+      }) => {
+        return habits
+          .filter((h) => {
+            if (h.userId !== where.userId) return false;
+            if (where.archivedAt === null) return h.archivedAt === null;
+            if (
+              where.archivedAt &&
+              typeof where.archivedAt === "object" &&
+              "not" in where.archivedAt
+            ) {
+              return h.archivedAt !== null;
+            }
+            return true;
+          })
+          .map(stripLogs);
+      },
+    ),
     findFirst: vi.fn(
       async ({ where }: { where: { id: string; userId: string } }) => {
         const h = habits.find(
@@ -91,6 +114,7 @@ export const fakePrisma = {
           userId: string;
           name: string;
           color: string;
+          icon?: string | null;
           type?: "build" | "quit";
           description?: string;
           goalType?: "daily" | "weekly" | "monthly";
@@ -98,6 +122,7 @@ export const fakePrisma = {
           isNumeric?: boolean;
           targetCount?: number;
           unitLabel?: string | null;
+          sortOrder?: number;
         };
       }) => {
         const habit: FakeHabit = {
@@ -105,6 +130,7 @@ export const fakePrisma = {
           userId: data.userId,
           name: data.name,
           color: data.color,
+          icon: data.icon ?? null,
           type: data.type ?? "build",
           description: data.description ?? null,
           goalType: data.goalType ?? "daily",
@@ -112,6 +138,8 @@ export const fakePrisma = {
           isNumeric: data.isNumeric ?? false,
           targetCount: data.targetCount ?? 1,
           unitLabel: data.unitLabel ?? null,
+          sortOrder: data.sortOrder ?? 0,
+          archivedAt: null,
           createdAt: new Date(),
           logs: [],
         };
@@ -128,6 +156,7 @@ export const fakePrisma = {
         data: Partial<{
           name: string;
           color: string;
+          icon: string | null;
           type: "build" | "quit";
           description: string;
           goalType: "daily" | "weekly" | "monthly";
@@ -135,12 +164,15 @@ export const fakePrisma = {
           isNumeric: boolean;
           targetCount: number;
           unitLabel: string | null;
+          sortOrder: number;
+          archivedAt: Date | null;
         }>;
       }) => {
         const h = habits.find((x) => x.id === where.id);
         if (!h) throw new Error("not found");
         if (data.name !== undefined) h.name = data.name;
         if (data.color !== undefined) h.color = data.color;
+        if (data.icon !== undefined) h.icon = data.icon;
         if (data.type !== undefined) h.type = data.type;
         if (data.description !== undefined) h.description = data.description;
         if (data.goalType !== undefined) h.goalType = data.goalType;
@@ -148,10 +180,13 @@ export const fakePrisma = {
         if (data.isNumeric !== undefined) h.isNumeric = data.isNumeric;
         if (data.targetCount !== undefined) h.targetCount = data.targetCount;
         if (data.unitLabel !== undefined) h.unitLabel = data.unitLabel;
+        if (data.sortOrder !== undefined) h.sortOrder = data.sortOrder;
+        if (data.archivedAt !== undefined) h.archivedAt = data.archivedAt;
         return {
           id: h.id,
           name: h.name,
           color: h.color,
+          icon: h.icon,
           type: h.type,
           description: h.description,
           goalType: h.goalType,
@@ -159,7 +194,16 @@ export const fakePrisma = {
           isNumeric: h.isNumeric,
           targetCount: h.targetCount,
           unitLabel: h.unitLabel,
+          sortOrder: h.sortOrder,
+          archivedAt: h.archivedAt,
         };
+      },
+    ),
+    aggregate: vi.fn(
+      async ({ where }: { where: { userId: string } }) => {
+        const mine = habits.filter((h) => h.userId === where.userId);
+        const max = mine.reduce((m, h) => Math.max(m, h.sortOrder), 0);
+        return { _max: { sortOrder: mine.length ? max : null } };
       },
     ),
     delete: vi.fn(async ({ where }: { where: { id: string } }) => {
@@ -169,6 +213,7 @@ export const fakePrisma = {
       return removed;
     }),
   },
+  $transaction: vi.fn(async (ops: Promise<unknown>[]) => Promise.all(ops)),
   habitLog: {
     upsert: vi.fn(
       async ({

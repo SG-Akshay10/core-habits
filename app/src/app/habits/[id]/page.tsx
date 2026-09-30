@@ -17,7 +17,7 @@ export default async function HabitDetailPage({ params }: Params) {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { timezone: true, weekStartDay: true },
+    select: { timezone: true, weekStartDay: true, theme: true },
   });
   const today = todayInTimezone(user?.timezone ?? "UTC");
 
@@ -32,11 +32,16 @@ export default async function HabitDetailPage({ params }: Params) {
 
   return (
     <div className="min-h-screen">
-      <TopBar userName={session.user.name} userImage={session.user.image} />
+      <TopBar
+        userName={session.user.name}
+        userImage={session.user.image}
+        theme={(user?.theme as "light" | "dark" | "system") ?? "system"}
+      />
       <HabitDetail
         habitId={habit.id}
         name={habit.name}
         color={habit.color}
+        icon={habit.icon}
         type={habit.type}
         goalType={habit.goalType}
         goalCount={habit.goalCount}

@@ -6,15 +6,26 @@ import { createHabitSchema } from "@/lib/validation";
 
 // GET /api/habits — list the signed-in user's habits with all logs.
 // Logs are returned as flat YYYY-MM-DD strings; the client builds the grid.
-export async function GET() {
+// Archived habits are excluded by default; pass ?archived=true to list only
+// archived habits (for the "Archived" section on the dashboard).
+export async function GET(req?: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const wantArchived = req
+    ? new URL(req.url).searchParams.get("archived") === "true"
+    : false;
+
   const habits = await prisma.habit.findMany({
-    where: { userId: session.user.id },
-    orderBy: { createdAt: "asc" },
+    where: {
+      userId: session.user.id,
+      archivedAt: wantArchived ? { not: null } : null,
+    },
+    orderBy: wantArchived
+      ? { archivedAt: "desc" }
+      : [{ sortOrder: "asc" }, { createdAt: "asc" }],
     include: {
       logs: {
         select: { date: true, value: true },
@@ -27,6 +38,7 @@ export async function GET() {
       id: h.id,
       name: h.name,
       color: h.color,
+      icon: h.icon,
       type: h.type,
       description: h.description,
       goalType: h.goalType,
@@ -34,6 +46,8 @@ export async function GET() {
       isNumeric: h.isNumeric,
       targetCount: h.targetCount,
       unitLabel: h.unitLabel,
+      sortOrder: h.sortOrder,
+      archivedAt: h.archivedAt,
       createdAt: h.createdAt,
       logDates: h.logs.map((l: { date: string }) => l.date),
       logValues: Object.fromEntries(
@@ -67,11 +81,17 @@ export async function POST(req: Request) {
     );
   }
 
+  const maxOrder = await prisma.habit.aggregate({
+    where: { userId: session.user.id },
+    _max: { sortOrder: true },
+  });
+
   const habit = await prisma.habit.create({
     data: {
       userId: session.user.id,
       name: parsed.data.name,
       color: parsed.data.color,
+      icon: parsed.data.icon ?? null,
       type: parsed.data.type,
       description: parsed.data.description,
       goalType: parsed.data.goalType,
@@ -79,6 +99,7 @@ export async function POST(req: Request) {
       isNumeric: parsed.data.isNumeric,
       targetCount: parsed.data.targetCount,
       unitLabel: parsed.data.unitLabel,
+      sortOrder: (maxOrder._max.sortOrder ?? 0) + 1,
     },
   });
 
@@ -88,6 +109,7 @@ export async function POST(req: Request) {
         id: habit.id,
         name: habit.name,
         color: habit.color,
+        icon: habit.icon,
         type: habit.type,
         description: habit.description,
         goalType: habit.goalType,
@@ -95,6 +117,8 @@ export async function POST(req: Request) {
         isNumeric: habit.isNumeric,
         targetCount: habit.targetCount,
         unitLabel: habit.unitLabel,
+        sortOrder: habit.sortOrder,
+        archivedAt: habit.archivedAt,
         createdAt: habit.createdAt,
         logDates: [] as string[],
         logValues: {} as Record<string, number>,

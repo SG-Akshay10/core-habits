@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
+/*
+ * Dark mode is controlled by a `.dark` class on <html> (set server-side
+ * from a cookie to avoid a flash, and toggled client-side), rather than
+ * only `prefers-color-scheme`, so users can explicitly pick light/dark
+ * instead of just following the system (5.6).
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --habit-grid-empty: #e5e7eb;
 }
 
 @theme inline {
@@ -12,11 +21,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --habit-grid-empty: #27272a;
 }
 
 body {
@@ -24,3 +32,4 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+

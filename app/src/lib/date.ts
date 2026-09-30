@@ -62,3 +62,16 @@ export function buildGridDates(endDate: string, weeks = 53): string[][] {
   }
   return columns;
 }
+
+/** Returns the last `count` dates (oldest first), ending on `endDate` inclusive. */
+export function lastNDays(endDate: string, count: number): string[] {
+  const [y, m, d] = endDate.split("-").map(Number);
+  const end = new Date(Date.UTC(y, m - 1, d));
+  const dates: string[] = [];
+  for (let i = count - 1; i >= 0; i--) {
+    const dt = new Date(end);
+    dt.setUTCDate(dt.getUTCDate() - i);
+    dates.push(dt.toISOString().slice(0, 10));
+  }
+  return dates;
+}

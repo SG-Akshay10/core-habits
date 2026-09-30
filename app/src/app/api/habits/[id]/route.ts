@@ -32,6 +32,7 @@ export async function GET(_req: Request, { params }: Params) {
       id: habit.id,
       name: habit.name,
       color: habit.color,
+      icon: habit.icon,
       type: habit.type,
       description: habit.description,
       goalType: habit.goalType,
@@ -39,6 +40,7 @@ export async function GET(_req: Request, { params }: Params) {
       isNumeric: habit.isNumeric,
       targetCount: habit.targetCount,
       unitLabel: habit.unitLabel,
+      archivedAt: habit.archivedAt,
       createdAt: habit.createdAt,
       logs: habit.logs,
     },
@@ -82,6 +84,7 @@ export async function PATCH(req: Request, { params }: Params) {
     data: {
       ...(parsed.data.name !== undefined ? { name: parsed.data.name } : {}),
       ...(parsed.data.color !== undefined ? { color: parsed.data.color } : {}),
+      ...(parsed.data.icon !== undefined ? { icon: parsed.data.icon } : {}),
       ...(parsed.data.type !== undefined ? { type: parsed.data.type } : {}),
       ...(parsed.data.description !== undefined
         ? { description: parsed.data.description }
@@ -101,6 +104,11 @@ export async function PATCH(req: Request, { params }: Params) {
       ...(parsed.data.unitLabel !== undefined
         ? { unitLabel: parsed.data.unitLabel }
         : {}),
+      // Archiving is a soft delete: set/clear archivedAt, never a hard
+      // delete, so history is always preserved and restorable.
+      ...(parsed.data.archived !== undefined
+        ? { archivedAt: parsed.data.archived ? new Date() : null }
+        : {}),
     },
   });
 
@@ -109,6 +117,7 @@ export async function PATCH(req: Request, { params }: Params) {
       id: habit.id,
       name: habit.name,
       color: habit.color,
+      icon: habit.icon,
       type: habit.type,
       description: habit.description,
       goalType: habit.goalType,
@@ -116,6 +125,7 @@ export async function PATCH(req: Request, { params }: Params) {
       isNumeric: habit.isNumeric,
       targetCount: habit.targetCount,
       unitLabel: habit.unitLabel,
+      archivedAt: habit.archivedAt,
     },
   });
 }
