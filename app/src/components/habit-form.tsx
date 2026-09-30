@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { HABIT_COLORS } from "@/lib/colors";
+import { HABIT_ICONS } from "@/lib/icons";
 
 export function HabitForm({
   initialName = "",
   initialColor = HABIT_COLORS[0],
+  initialIcon = null,
   initialType = "build",
   initialGoalType = "daily",
   initialGoalCount = 1,
@@ -20,6 +22,7 @@ export function HabitForm({
 }: {
   initialName?: string;
   initialColor?: string;
+  initialIcon?: string | null;
   initialType?: "build" | "quit";
   initialGoalType?: "daily" | "weekly" | "monthly";
   initialGoalCount?: number;
@@ -33,6 +36,7 @@ export function HabitForm({
   onSubmit: (values: {
     name: string;
     color: string;
+    icon: string | null;
     type: "build" | "quit";
     goalType: "daily" | "weekly" | "monthly";
     goalCount: number;
@@ -44,6 +48,8 @@ export function HabitForm({
 }) {
   const [name, setName] = useState(initialName);
   const [color, setColor] = useState(initialColor);
+  const [icon, setIcon] = useState<string | null>(initialIcon);
+  const [iconQuery, setIconQuery] = useState("");
   const [type, setType] = useState<"build" | "quit">(initialType);
   const [goalType, setGoalType] = useState<"daily" | "weekly" | "monthly">(
     initialGoalType,
@@ -53,6 +59,14 @@ export function HabitForm({
   const [targetCount, setTargetCount] = useState(initialTargetCount);
   const [unitLabel, setUnitLabel] = useState(initialUnitLabel);
   const [error, setError] = useState<string | null>(null);
+
+  const filteredIcons = useMemo(() => {
+    const q = iconQuery.trim().toLowerCase();
+    if (!q) return HABIT_ICONS;
+    return HABIT_ICONS.filter(
+      (i) => i.name.includes(q) || i.keywords.some((k) => k.includes(q)),
+    );
+  }, [iconQuery]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -77,6 +91,7 @@ export function HabitForm({
     onSubmit({
       name: trimmed,
       color,
+      icon,
       type,
       goalType,
       goalCount,
@@ -137,6 +152,56 @@ export function HabitForm({
           className="rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-500 dark:border-gray-700 dark:bg-gray-900"
         />
         {error && <span className="text-xs text-red-600">{error}</span>}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium">Icon</span>
+        <div className="flex items-center gap-2">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-300 text-lg dark:border-gray-700"
+            aria-hidden
+          >
+            {icon ? HABIT_ICONS.find((i) => i.name === icon)?.emoji : "—"}
+          </span>
+          <input
+            type="text"
+            value={iconQuery}
+            onChange={(e) => setIconQuery(e.target.value)}
+            placeholder="Search icons…"
+            aria-label="Search icons"
+            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-500 dark:border-gray-700 dark:bg-gray-900"
+          />
+          {icon && (
+            <button
+              type="button"
+              onClick={() => setIcon(null)}
+              className="shrink-0 rounded-md px-2 py-2 text-xs text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <div className="mt-1 flex max-h-28 flex-wrap gap-1 overflow-y-auto rounded-md border border-gray-200 p-2 dark:border-gray-800">
+          {filteredIcons.map((i) => (
+            <button
+              key={i.name}
+              type="button"
+              aria-label={i.name}
+              aria-pressed={icon === i.name}
+              onClick={() => setIcon(i.name)}
+              className={`flex h-8 w-8 items-center justify-center rounded-md text-base ${
+                icon === i.name
+                  ? "bg-gray-900 dark:bg-gray-100"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+            >
+              {i.emoji}
+            </button>
+          ))}
+          {filteredIcons.length === 0 && (
+            <span className="p-1 text-xs text-gray-500">No icons found</span>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">

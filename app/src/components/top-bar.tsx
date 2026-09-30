@@ -1,17 +1,24 @@
 import { signOutAction } from "@/app/actions";
+import { ThemeToggle } from "@/components/theme-toggle";
+import type { Theme } from "@/lib/theme";
 
 export function TopBar({
   userName,
   userImage,
+  theme,
 }: {
   userName?: string | null;
   userImage?: string | null;
+  theme?: Theme;
 }) {
   return (
     <header className="flex items-center justify-between border-b border-gray-200 px-6 py-3 dark:border-gray-800">
       <span className="text-lg font-semibold">Core Habits</span>
 
-      <div className="group relative">
+      <div className="flex items-center gap-3">
+        <ThemeToggle initialTheme={theme ?? "system"} />
+
+        <div className="group relative">
         <button
           type="button"
           className="flex items-center gap-2 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -49,6 +56,7 @@ export function TopBar({
             Delete account
           </a>
         </div>
+      </div>
       </div>
     </header>
   );

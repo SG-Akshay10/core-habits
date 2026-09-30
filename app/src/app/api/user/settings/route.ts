@@ -3,13 +3,21 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientKey } from "@/lib/rate-limit";
-import { weekStartDaySchema } from "@/lib/validation";
+import {
+  weekStartDaySchema,
+  themeSchema,
+  defaultViewSchema,
+} from "@/lib/validation";
 
 const bodySchema = z.object({
-  weekStartDay: weekStartDaySchema,
+  weekStartDay: weekStartDaySchema.optional(),
+  theme: themeSchema.optional(),
+  defaultView: defaultViewSchema.optional(),
 });
 
-// GET /api/user/settings — currently just the week-start-day preference.
+// GET /api/user/settings — week-start-day, theme, and default dashboard
+// view preferences. Stored server-side (not just localStorage) so they
+// follow the user across devices.
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
@@ -18,14 +26,20 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { weekStartDay: true },
+    select: { weekStartDay: true, theme: true, defaultView: true },
   });
 
-  return NextResponse.json({ weekStartDay: user?.weekStartDay ?? 0 });
+  return NextResponse.json({
+    weekStartDay: user?.weekStartDay ?? 0,
+    theme: user?.theme ?? "system",
+    defaultView: user?.defaultView ?? "cards",
+  });
 }
 
-// POST /api/user/settings — update the week-start-day preference used for
-// weekly goal progress and week streaks.
+// POST /api/user/settings — update any subset of the week-start-day,
+// theme, and default view preferences. These are cheap, frequent writes
+// (e.g. toggling dark mode), so only the fields provided are updated —
+// no unrelated writes, and no full-page reload is required client-side.
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -33,7 +47,7 @@ export async function POST(req: Request) {
   }
 
   const { success } = rateLimit(`settings:${getClientKey(req)}`, {
-    limit: 10,
+    limit: 30,
     windowMs: 60_000,
   });
   if (!success) {
@@ -44,11 +58,24 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
+  const { weekStartDay, theme, defaultView } = parsed.data;
+  if (
+    weekStartDay === undefined &&
+    theme === undefined &&
+    defaultView === undefined
+  ) {
+    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+  }
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { weekStartDay: parsed.data.weekStartDay },
+    data: {
+      ...(weekStartDay !== undefined ? { weekStartDay } : {}),
+      ...(theme !== undefined ? { theme } : {}),
+      ...(defaultView !== undefined ? { defaultView } : {}),
+    },
   });
 
   return NextResponse.json({ ok: true });
 }
+

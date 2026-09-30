@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { HABIT_COLORS } from "@/lib/colors";
+import { HABIT_ICONS } from "@/lib/icons";
 import { isValidDateString } from "@/lib/date";
+
+const HABIT_ICON_NAMES = HABIT_ICONS.map((i) => i.name) as [
+  string,
+  ...string[],
+];
 
 export const habitNameSchema = z
   .string()
@@ -12,6 +18,10 @@ export const habitColorSchema = z.enum(
   HABIT_COLORS as unknown as [string, ...string[]],
   { message: "Invalid color" },
 );
+
+export const habitIconSchema = z.enum(HABIT_ICON_NAMES, {
+  message: "Invalid icon",
+}).nullable();
 
 export const habitTypeSchema = z.enum(["build", "quit"], {
   message: "Invalid habit type",
@@ -59,6 +69,7 @@ export const logValueSchema = z
 export const createHabitSchema = z.object({
   name: habitNameSchema,
   color: habitColorSchema,
+  icon: habitIconSchema.optional(),
   type: habitTypeSchema.optional().default("build"),
   description: habitDescriptionSchema.optional(),
   goalType: goalTypeSchema.optional().default("daily"),
@@ -72,6 +83,7 @@ export const updateHabitSchema = z
   .object({
     name: habitNameSchema.optional(),
     color: habitColorSchema.optional(),
+    icon: habitIconSchema.optional(),
     type: habitTypeSchema.optional(),
     description: habitDescriptionSchema.optional(),
     goalType: goalTypeSchema.optional(),
@@ -79,20 +91,35 @@ export const updateHabitSchema = z
     isNumeric: isNumericSchema.optional(),
     targetCount: targetCountSchema.optional(),
     unitLabel: unitLabelSchema.optional(),
+    archived: z.boolean().optional(),
   })
   .refine(
     (data) =>
       data.name !== undefined ||
       data.color !== undefined ||
+      data.icon !== undefined ||
       data.type !== undefined ||
       data.description !== undefined ||
       data.goalType !== undefined ||
       data.goalCount !== undefined ||
       data.isNumeric !== undefined ||
       data.targetCount !== undefined ||
-      data.unitLabel !== undefined,
+      data.unitLabel !== undefined ||
+      data.archived !== undefined,
     { message: "At least one field must be provided" },
   );
+
+export const themeSchema = z.enum(["light", "dark", "system"], {
+  message: "Invalid theme",
+});
+
+export const defaultViewSchema = z.enum(["cards", "checklist", "compact"], {
+  message: "Invalid view",
+});
+
+export const reorderHabitsSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1).max(500),
+});
 
 export const weekStartDaySchema = z.number().int().min(0).max(6);
 

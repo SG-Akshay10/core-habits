@@ -7,11 +7,13 @@ import { StreakChips } from "@/components/streak-chips";
 import { GoalChip } from "@/components/goal-chip";
 import { calculateStreak } from "@/lib/streak";
 import { calculateWeekStreak } from "@/lib/goals";
+import { habitIconEmoji } from "@/lib/icons";
 
 export function HabitCard({
   id,
   name,
   color,
+  icon,
   type,
   goalType,
   goalCount,
@@ -23,14 +25,26 @@ export function HabitCard({
   today,
   weekStartDay,
   isLoggedToday,
+  canMoveUp = false,
+  canMoveDown = false,
+  draggable = false,
   onToggleToday,
   onSetValue,
   onEdit,
   onDelete,
+  onArchive,
+  onDuplicate,
+  onMoveUp,
+  onMoveDown,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
 }: {
   id: string;
   name: string;
   color: string;
+  icon?: string | null;
   type: "build" | "quit";
   goalType: "daily" | "weekly" | "monthly";
   goalCount: number;
@@ -42,10 +56,21 @@ export function HabitCard({
   today: string;
   weekStartDay: number;
   isLoggedToday: boolean;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  draggable?: boolean;
   onToggleToday: () => void;
   onSetValue: (value: number) => void;
   onEdit: () => void;
   onDelete: () => void;
+  onArchive?: () => void;
+  onDuplicate?: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const goal = { goalType, goalCount };
@@ -58,18 +83,59 @@ export function HabitCard({
     type === "quit" ? "Undo today's clean day" : "Undo today's log";
 
   return (
-    <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+    <div
+      className="rounded-lg border border-gray-200 p-4 dark:border-gray-800"
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+    >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <Link
-          href={`/habits/${id}`}
-          className="flex min-w-0 items-center gap-2 hover:underline"
-        >
-          <span
-            className="h-3 w-3 shrink-0 rounded-full"
-            style={{ backgroundColor: color }}
-          />
-          <h3 className="truncate font-medium">{name}</h3>
-        </Link>
+        <div className="flex min-w-0 items-center gap-1">
+          {draggable && (
+            <span
+              className="cursor-grab select-none px-1 text-gray-400"
+              aria-hidden
+              title="Drag to reorder"
+            >
+              ⠿
+            </span>
+          )}
+          {(onMoveUp || onMoveDown) && (
+            <div className="flex flex-col">
+              <button
+                type="button"
+                aria-label={`Move ${name} up`}
+                disabled={!canMoveUp}
+                onClick={onMoveUp}
+                className="leading-none text-gray-400 hover:text-gray-700 disabled:opacity-20 dark:hover:text-gray-200"
+              >
+                ▲
+              </button>
+              <button
+                type="button"
+                aria-label={`Move ${name} down`}
+                disabled={!canMoveDown}
+                onClick={onMoveDown}
+                className="leading-none text-gray-400 hover:text-gray-700 disabled:opacity-20 dark:hover:text-gray-200"
+              >
+                ▼
+              </button>
+            </div>
+          )}
+          <Link
+            href={`/habits/${id}`}
+            className="flex min-w-0 items-center gap-2 hover:underline"
+          >
+            <span
+              className="h-3 w-3 shrink-0 rounded-full"
+              style={{ backgroundColor: color }}
+            />
+            {icon && <span aria-hidden>{habitIconEmoji(icon)}</span>}
+            <h3 className="truncate font-medium">{name}</h3>
+          </Link>
+        </div>
 
         <div className="flex shrink-0 items-center gap-1">
           {isNumeric ? (
@@ -144,6 +210,30 @@ export function HabitCard({
                 >
                   Edit
                 </button>
+                {onDuplicate && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onDuplicate();
+                    }}
+                    className="block w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    Duplicate
+                  </button>
+                )}
+                {onArchive && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onArchive();
+                    }}
+                    className="block w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    Archive
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => {

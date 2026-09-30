@@ -19,6 +19,8 @@ model User {
   image         String?
   timezone      String?
   weekStartDay  Int       @default(0) @map("week_start_day")
+  theme         String    @default("system")
+  defaultView   String    @default("cards") @map("default_view")
   createdAt     DateTime  @default(now())
 
   accounts Account[]
@@ -84,6 +86,7 @@ model Habit {
   userId      String    @map("user_id")
   name        String
   color       String
+  icon        String?
   type        HabitType @default(build)
   description String?
   goalType    GoalType  @default(daily) @map("goal_type")
@@ -91,6 +94,8 @@ model Habit {
   isNumeric   Boolean   @default(false) @map("is_numeric")
   targetCount Int       @default(1) @map("target_count")
   unitLabel   String?   @map("unit_label")
+  sortOrder   Int       @default(0) @map("sort_order")
+  archivedAt  DateTime? @map("archived_at")
   createdAt   DateTime  @default(now()) @map("created_at")
 
   user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
