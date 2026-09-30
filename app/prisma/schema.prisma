@@ -67,12 +67,19 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
+enum HabitType {
+  build
+  quit
+}
+
 model Habit {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  name      String
-  color     String
-  createdAt DateTime @default(now()) @map("created_at")
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  name        String
+  color       String
+  type        HabitType @default(build)
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   logs HabitLog[]
@@ -85,6 +92,7 @@ model HabitLog {
   id        String   @id @default(cuid())
   habitId   String   @map("habit_id")
   date      String
+  note      String?
   createdAt DateTime @default(now()) @map("created_at")
 
   habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)

@@ -10,8 +10,39 @@ async function getOwnedHabit(userId: string, habitId: string) {
   return prisma.habit.findFirst({ where: { id: habitId, userId } });
 }
 
-// PATCH /api/habits/:id — update name and/or color. Ownership enforced
-// server-side; never trust a habit id belonging to another user.
+// GET /api/habits/:id — a single owned habit with its full log history
+// (including notes), for the habit detail page (grid + calendar + streaks).
+export async function GET(_req: Request, { params }: Params) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const habit = await prisma.habit.findFirst({
+    where: { id, userId: session.user.id },
+    include: { logs: { select: { date: true, note: true } } },
+  });
+  if (!habit) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    habit: {
+      id: habit.id,
+      name: habit.name,
+      color: habit.color,
+      type: habit.type,
+      description: habit.description,
+      createdAt: habit.createdAt,
+      logs: habit.logs,
+    },
+  });
+}
+
+// PATCH /api/habits/:id — update name, color, type and/or description.
+// Ownership enforced server-side; never trust a habit id belonging to
+// another user.
 export async function PATCH(req: Request, { params }: Params) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -46,11 +77,21 @@ export async function PATCH(req: Request, { params }: Params) {
     data: {
       ...(parsed.data.name !== undefined ? { name: parsed.data.name } : {}),
       ...(parsed.data.color !== undefined ? { color: parsed.data.color } : {}),
+      ...(parsed.data.type !== undefined ? { type: parsed.data.type } : {}),
+      ...(parsed.data.description !== undefined
+        ? { description: parsed.data.description }
+        : {}),
     },
   });
 
   return NextResponse.json({
-    habit: { id: habit.id, name: habit.name, color: habit.color },
+    habit: {
+      id: habit.id,
+      name: habit.name,
+      color: habit.color,
+      type: habit.type,
+      description: habit.description,
+    },
   });
 }
 

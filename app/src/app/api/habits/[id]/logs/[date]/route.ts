@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientKey } from "@/lib/rate-limit";
-import { dateParamSchema } from "@/lib/validation";
+import { dateParamSchema, logBodySchema } from "@/lib/validation";
 
 type Params = { params: Promise<{ id: string; date: string }> };
 
@@ -37,10 +37,20 @@ export async function PUT(req: Request, { params }: Params) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  const json = await req.json().catch(() => ({}));
+  const parsedBody = logBodySchema.safeParse(json ?? {});
+  if (!parsedBody.success) {
+    return NextResponse.json(
+      { error: "Invalid body", issues: parsedBody.error.issues },
+      { status: 400 },
+    );
+  }
+  const note = parsedBody.data.note ?? null;
+
   await prisma.habitLog.upsert({
     where: { habitId_date: { habitId: id, date: parsedDate.data } },
-    create: { habitId: id, date: parsedDate.data },
-    update: {},
+    create: { habitId: id, date: parsedDate.data, note },
+    update: { note },
   });
 
   return NextResponse.json({ ok: true });

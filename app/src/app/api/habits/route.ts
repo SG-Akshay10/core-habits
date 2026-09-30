@@ -27,6 +27,8 @@ export async function GET() {
       id: h.id,
       name: h.name,
       color: h.color,
+      type: h.type,
+      description: h.description,
       createdAt: h.createdAt,
       logDates: h.logs.map((l: { date: string }) => l.date),
     })),
@@ -62,6 +64,8 @@ export async function POST(req: Request) {
       userId: session.user.id,
       name: parsed.data.name,
       color: parsed.data.color,
+      type: parsed.data.type,
+      description: parsed.data.description,
     },
   });
 
@@ -71,6 +75,8 @@ export async function POST(req: Request) {
         id: habit.id,
         name: habit.name,
         color: habit.color,
+        type: habit.type,
+        description: habit.description,
         createdAt: habit.createdAt,
         logDates: [] as string[],
       },

@@ -34,6 +34,7 @@ export default async function DashboardPage() {
           id: h.id,
           name: h.name,
           color: h.color,
+          type: h.type,
           logDates: h.logs.map((l) => l.date),
         }))}
       />
