@@ -4,8 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   GripVertical,
-  ChevronUp,
-  ChevronDown,
   MoreVertical,
   Minus,
   Plus,
@@ -34,8 +32,6 @@ export function HabitCard({
   today,
   weekStartDay,
   isLoggedToday,
-  canMoveUp = false,
-  canMoveDown = false,
   draggable = false,
   onToggleToday,
   onSetValue,
@@ -43,8 +39,6 @@ export function HabitCard({
   onDelete,
   onArchive,
   onDuplicate,
-  onMoveUp,
-  onMoveDown,
   onDragStart,
   onDragOver,
   onDrop,
@@ -65,8 +59,6 @@ export function HabitCard({
   today: string;
   weekStartDay: number;
   isLoggedToday: boolean;
-  canMoveUp?: boolean;
-  canMoveDown?: boolean;
   draggable?: boolean;
   onToggleToday: () => void;
   onSetValue: (value: number) => void;
@@ -74,8 +66,6 @@ export function HabitCard({
   onDelete: () => void;
   onArchive?: () => void;
   onDuplicate?: () => void;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
   onDragStart?: (e: React.DragEvent) => void;
   onDragOver?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent) => void;
@@ -111,28 +101,6 @@ export function HabitCard({
             >
               <GripVertical className="h-4 w-4" />
             </span>
-          )}
-          {(onMoveUp || onMoveDown) && (
-            <div className="flex flex-col">
-              <button
-                type="button"
-                aria-label={`Move ${name} up`}
-                disabled={!canMoveUp}
-                onClick={onMoveUp}
-                className="leading-none text-gray-400 hover:text-gray-700 disabled:opacity-20 dark:hover:text-gray-200"
-              >
-                <ChevronUp className="h-3.5 w-3.5" />
-              </button>
-              <button
-                type="button"
-                aria-label={`Move ${name} down`}
-                disabled={!canMoveDown}
-                onClick={onMoveDown}
-                className="leading-none text-gray-400 hover:text-gray-700 disabled:opacity-20 dark:hover:text-gray-200"
-              >
-                <ChevronDown className="h-3.5 w-3.5" />
-              </button>
-            </div>
           )}
           <Link
             href={`/habits/${id}`}
@@ -283,4 +251,3 @@ export function HabitCard({
     </div>
   );
 }
-

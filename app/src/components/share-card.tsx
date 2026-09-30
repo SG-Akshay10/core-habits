@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { buildGridDates } from "@/lib/date";
 import { calculateStreak } from "@/lib/streak";
 import { HABIT_COLORS } from "@/lib/colors";
-import { habitIconEmoji } from "@/lib/icons";
 
 type ShareTheme = "light" | "dark";
 
@@ -65,16 +64,15 @@ export function ShareCard({
     ctx.fillRect(0, 0, width, height);
 
     // Header.
-    const emoji = icon ? habitIconEmoji(icon) : null;
     ctx.fillStyle = fg;
     ctx.font = "600 44px system-ui, -apple-system, sans-serif";
     ctx.textBaseline = "top";
-    ctx.fillText(`${emoji ? emoji + " " : ""}${habitName}`, 60, 56);
+    ctx.fillText(habitName, 60, 56);
 
     ctx.fillStyle = subtle;
     ctx.font = "500 24px system-ui, -apple-system, sans-serif";
     ctx.fillText(
-      `🔥 ${streak.current}-day current streak · ${streak.longest}-day best`,
+      `${streak.current}-day current streak · ${streak.longest}-day best`,
       60,
       118,
     );
@@ -151,7 +149,7 @@ export function ShareCard({
         await navigator.share({
           files: [file],
           title: `${habitName} streak`,
-          text: `My ${streak.current}-day streak on ${habitName} 🔥`,
+          text: `My ${streak.current}-day streak on ${habitName}`,
         });
       } else {
         await handleDownload();

@@ -256,19 +256,6 @@ export function HabitList({
     }).catch(() => {});
   }
 
-  // Keyboard-accessible reorder alternative to drag-and-drop (5.4).
-  function moveHabit(habitId: string, direction: -1 | 1) {
-    setHabits((prev) => {
-      const index = prev.findIndex((h) => h.id === habitId);
-      const target = index + direction;
-      if (index === -1 || target < 0 || target >= prev.length) return prev;
-      const next = [...prev];
-      [next[index], next[target]] = [next[target], next[index]];
-      persistOrder(next);
-      return next;
-    });
-  }
-
   function handleDragStart(habitId: string) {
     setDragId(habitId);
   }
@@ -500,7 +487,7 @@ export function HabitList({
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {habits.map((habit, index) => (
+          {habits.map((habit) => (
             <HabitCard
               key={habit.id}
               id={habit.id}
@@ -519,16 +506,12 @@ export function HabitList({
               weekStartDay={weekStartDay}
               isLoggedToday={habit.logDates.includes(today)}
               draggable
-              canMoveUp={index > 0}
-              canMoveDown={index < habits.length - 1}
               onToggleToday={() => handleToggleToday(habit.id)}
               onSetValue={(value) => handleSetValue(habit.id, value)}
               onEdit={() => setEditingId(habit.id)}
               onDelete={() => setDeletingId(habit.id)}
               onArchive={() => handleArchive(habit.id)}
               onDuplicate={() => handleDuplicate(habit.id)}
-              onMoveUp={() => moveHabit(habit.id, -1)}
-              onMoveDown={() => moveHabit(habit.id, 1)}
               onDragStart={() => handleDragStart(habit.id)}
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(habit.id)}
@@ -559,10 +542,6 @@ export function HabitList({
                   key={habit.id}
                   className="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 dark:border-gray-800"
                 >
-                  <span
-                    className="h-3 w-3 shrink-0 rounded-full opacity-60"
-                    style={{ backgroundColor: habit.color }}
-                  />
                   <span className="min-w-0 flex-1 truncate text-sm text-gray-500">
                     {habit.name}
                   </span>

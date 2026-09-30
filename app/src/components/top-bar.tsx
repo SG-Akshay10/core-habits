@@ -1,4 +1,5 @@
-import { CheckCheck, BarChart3 } from "lucide-react";
+import { BarChart3, Settings, LogOut } from "lucide-react";
+import Link from "next/link";
 import { signOutAction } from "@/app/actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Theme } from "@/lib/theme";
@@ -14,15 +15,9 @@ export function TopBar({
 }) {
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--surface-border)] bg-[var(--surface)]/90 px-6 py-3 backdrop-blur">
-      <span className="flex items-center gap-2 text-lg font-bold tracking-tight">
-        <span
-          className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-sm"
-          aria-hidden
-        >
-          <CheckCheck className="h-4.5 w-4.5" strokeWidth={2.5} />
-        </span>
+      <Link href="/dashboard" className="font-serif text-xl font-semibold tracking-[0.015em] text-gray-900 dark:text-gray-100">
         Core Habits
-      </span>
+      </Link>
 
       <div className="flex items-center gap-3">
         <a
@@ -37,6 +32,7 @@ export function TopBar({
         <div className="group relative">
         <button
           type="button"
+          aria-label="Open account menu"
           className="flex items-center gap-2 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           {userImage ? (
@@ -62,15 +58,17 @@ export function TopBar({
               type="submit"
               className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
             >
+              <LogOut className="mr-2 inline h-4 w-4" />
               Sign out
             </button>
           </form>
-          <a
+          <Link
             href="/settings"
-            className="block px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="block px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
           >
-            Delete account
-          </a>
+            <Settings className="mr-2 inline h-4 w-4" />
+            Settings
+          </Link>
         </div>
       </div>
       </div>
