@@ -1,8 +1,8 @@
 export const THEME_COOKIE = "theme";
-export type Theme = "light" | "dark" | "system";
+export type Theme = "light" | "dark";
 
 export function isValidTheme(value: string | undefined): value is Theme {
-  return value === "light" || value === "dark" || value === "system";
+  return value === "light" || value === "dark";
 }
 
 /**
@@ -15,11 +15,6 @@ export function isValidTheme(value: string | undefined): value is Theme {
  * or hook) so it can freely mutate `document`.
  */
 export function applyTheme(theme: Theme) {
-  const isDark =
-    theme === "dark" ||
-    (theme === "system" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.classList.toggle("dark", isDark);
+  document.documentElement.classList.toggle("dark", theme === "dark");
   document.cookie = `${THEME_COOKIE}=${theme}; path=/; max-age=31536000; samesite=lax`;
 }
-

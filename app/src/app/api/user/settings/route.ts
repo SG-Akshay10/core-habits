@@ -31,7 +31,7 @@ export async function GET() {
 
   return NextResponse.json({
     weekStartDay: user?.weekStartDay ?? 0,
-    theme: user?.theme ?? "system",
+    theme: user?.theme === "dark" ? "dark" : "light",
     defaultView: user?.defaultView ?? "cards",
   });
 }
@@ -78,4 +78,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
-

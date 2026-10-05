@@ -1,4 +1,4 @@
-import { BarChart3, Settings, LogOut } from "lucide-react";
+import { BarChart3, Settings, LogOut, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { signOutAction } from "@/app/actions";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -20,15 +20,16 @@ export function TopBar({
       </Link>
 
       <div className="flex items-center gap-3">
-        <a
-          href="/progress"
-          className="flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100 sm:px-3"
-        >
-          <BarChart3 className="h-4 w-4" aria-hidden />
-          Progress
-        </a>
-        <ThemeToggle initialTheme={theme ?? "system"} />
-
+        <nav aria-label="Main navigation" className="flex items-center gap-1">
+          <Link href="/dashboard" className="top-nav-link">
+            <LayoutDashboard className="h-4 w-4" aria-hidden />
+            Dashboard
+          </Link>
+          <Link href="/analytics" className="top-nav-link">
+            <BarChart3 className="h-4 w-4" aria-hidden />
+            Analytics
+          </Link>
+        </nav>
         <div className="group relative">
         <button
           type="button"
@@ -49,9 +50,13 @@ export function TopBar({
           )}
         </button>
 
-        <div className="invisible absolute right-0 z-10 mt-2 w-48 rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] py-1 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+        <div className="invisible absolute right-0 z-10 mt-2 w-56 rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] py-1 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
           <div className="truncate px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
             {userName}
+          </div>
+          <div className="flex items-center justify-between border-y border-[var(--surface-border)] px-4 py-2">
+            <span className="text-sm">Appearance</span>
+            <ThemeToggle initialTheme={theme ?? "light"} />
           </div>
           <form action={signOutAction}>
             <button

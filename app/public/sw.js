@@ -12,7 +12,9 @@
  * and the app can prompt the user to refresh via the "controllerchange"
  * event (see sw-register.tsx).
  */
-const CACHE_VERSION = "v1";
+// v2 drops the older cached Next.js chunks, which could leave a refreshed
+// application mixing module factories from different development builds.
+const CACHE_VERSION = "v2";
 const SHELL_CACHE = `core-habits-shell-${CACHE_VERSION}`;
 const SHELL_URLS = ["/dashboard", "/manifest.webmanifest", "/icons/icon.svg"];
 
@@ -62,7 +64,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
+  // Next.js chunks can change in place during development. Let Next/browser
+  // caching handle them so the worker never serves a chunk from an older build.
+  if (url.pathname.startsWith("/_next/")) return;
+
+  if (url.pathname.startsWith("/icons/")) {
     event.respondWith(
       caches.match(request).then(
         (cached) =>

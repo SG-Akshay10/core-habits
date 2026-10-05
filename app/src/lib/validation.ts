@@ -109,7 +109,7 @@ export const updateHabitSchema = z
     { message: "At least one field must be provided" },
   );
 
-export const themeSchema = z.enum(["light", "dark", "system"], {
+export const themeSchema = z.enum(["light", "dark"], {
   message: "Invalid theme",
 });
 
