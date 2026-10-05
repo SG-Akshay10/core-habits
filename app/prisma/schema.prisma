@@ -18,10 +18,15 @@ model User {
   emailVerified DateTime?
   image         String?
   timezone      String?
+  weekStartDay  Int       @default(0) @map("week_start_day")
+  theme         String    @default("light")
+  defaultView   String    @default("cards") @map("default_view")
   createdAt     DateTime  @default(now())
 
-  accounts Account[]
-  sessions Session[]
+  accounts          Account[]
+  sessions          Session[]
+  habits            Habit[]
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
 }
@@ -64,4 +69,84 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+enum HabitType {
+  build
+  quit
+}
+
+enum GoalType {
+  daily
+  weekly
+  monthly
+}
+
+model Habit {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  name        String
+  color       String
+  icon        String?
+  type        HabitType @default(build)
+  description String?
+  goalType    GoalType  @default(daily) @map("goal_type")
+  goalCount   Int       @default(1) @map("goal_count")
+  isNumeric   Boolean   @default(false) @map("is_numeric")
+  targetCount Int       @default(1) @map("target_count")
+  unitLabel   String?   @map("unit_label")
+  sortOrder   Int       @default(0) @map("sort_order")
+  archivedAt  DateTime? @map("archived_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs      HabitLog[]
+  reminders Reminder[]
+
+  @@index([userId])
+  @@map("habits")
+}
+
+model Reminder {
+  id          String   @id @default(cuid())
+  habitId     String   @map("habit_id")
+  time        String // "HH:MM" 24h, interpreted in the habit owner's timezone
+  daysOfWeek  Int[]    @map("days_of_week") // 0 = Sunday .. 6 = Saturday
+  enabled     Boolean  @default(true)
+  lastSentFor String?  @map("last_sent_for") // last "YYYY-MM-DD" a push was sent for, to avoid duplicate sends
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@index([habitId])
+  @@map("reminders")
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model HabitLog {
+  id        String   @id @default(cuid())
+  habitId   String   @map("habit_id")
+  date      String
+  note      String?
+  value     Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId, date])
+  @@map("habit_logs")
 }
