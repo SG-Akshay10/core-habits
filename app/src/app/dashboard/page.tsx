@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { TopBar } from "@/components/top-bar";
 import { TimezoneSync } from "@/components/timezone-sync";
 import { HabitList } from "@/components/habit-list";
-import { OverviewStatsBar } from "@/components/overview-stats-bar";
+import { DashboardConsole } from "@/components/dashboard-console";
 import { prisma } from "@/lib/prisma";
 import { todayInTimezone } from "@/lib/date";
 import { computeOverviewStats } from "@/lib/overview-stats";
@@ -35,16 +35,25 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="telemetry-dashboard min-h-screen bg-[var(--background)]">
       <TimezoneSync />
       <TopBar
         userName={session.user.name}
         userImage={session.user.image}
-        theme={(user?.theme as "light" | "dark" | "system") ?? "system"}
+        theme={user?.theme === "dark" ? "dark" : "light"}
       />
-      <div className="mx-auto w-full max-w-6xl px-4 pt-5 sm:px-6 sm:pt-8">
-        <OverviewStatsBar stats={overview} />
-      </div>
+      <main className="dashboard-main">
+        <DashboardConsole
+          today={today}
+          habits={habits.map((habit) => ({
+            logDates: habit.logs.map((log) => log.date),
+            goalType: habit.goalType,
+            goalCount: habit.goalCount,
+          }))}
+          bestStreak={overview.bestStreak}
+          activeHabits={overview.activeHabits}
+          totalCheckIns={overview.totalCheckIns}
+        />
       <HabitList
         today={today}
         weekStartDay={user?.weekStartDay ?? 0}
@@ -84,6 +93,7 @@ export default async function DashboardPage() {
           ),
         }))}
       />
+      </main>
     </div>
   );
 

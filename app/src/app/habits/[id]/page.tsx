@@ -35,7 +35,7 @@ export default async function HabitDetailPage({ params }: Params) {
       <TopBar
         userName={session.user.name}
         userImage={session.user.image}
-        theme={(user?.theme as "light" | "dark" | "system") ?? "system"}
+        theme={user?.theme === "dark" ? "dark" : "light"}
       />
       <HabitDetail
         habitId={habit.id}

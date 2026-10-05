@@ -23,7 +23,7 @@ export default function SettingsPage() {
   const [pending, setPending] = useState(false);
   const [weekStartDay, setWeekStartDay] = useState<number | null>(null);
   const [savingWeekStart, setSavingWeekStart] = useState(false);
-  const [theme, setTheme] = useState<Theme>("system");
+  const [theme, setTheme] = useState<Theme>("light");
   const [defaultView, setDefaultView] = useState<OverviewView>("cards");
   const [importPayload, setImportPayload] = useState<unknown>(null);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(
@@ -40,7 +40,7 @@ export default function SettingsPage() {
       .then((res) => res.json())
       .then((data) => {
         setWeekStartDay(data.weekStartDay ?? 0);
-        setTheme(data.theme ?? "system");
+        setTheme(data.theme === "dark" ? "dark" : "light");
         setDefaultView(data.defaultView ?? "cards");
       })
       .catch(() => setWeekStartDay(0));
@@ -164,14 +164,13 @@ export default function SettingsPage() {
       <section className="mt-10 rounded-lg border border-gray-200 p-6 dark:border-gray-800">
         <h2 className="font-medium">Appearance</h2>
         <p className="mt-2 text-sm text-gray-500">
-          Choose light, dark, or follow your system setting.
+          Choose a light or dark appearance.
         </p>
         <div className="mt-4 flex gap-2">
           {(
             [
               { value: "light", label: "Light" },
               { value: "dark", label: "Dark" },
-              { value: "system", label: "System" },
             ] as const
           ).map((opt) => (
             <button

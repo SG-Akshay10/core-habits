@@ -1,18 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
 import type { Theme } from "@/lib/theme";
 import { applyTheme } from "@/lib/theme";
 
 const OPTIONS: { value: Theme; label: string; Icon: typeof Sun }[] = [
   { value: "light", label: "Light", Icon: Sun },
   { value: "dark", label: "Dark", Icon: Moon },
-  { value: "system", label: "System", Icon: Monitor },
 ];
 
 /**
- * Light/dark/system toggle (5.6). Applying the theme is an instant, local
+ * Light/dark toggle. Applying the theme is an instant, local
  * DOM class change — no page reload — and persisting the choice is a
  * single small, debounced-by-nature write (only on click), not on every
  * render.
@@ -31,7 +30,7 @@ export function ThemeToggle({ initialTheme }: { initialTheme: Theme }) {
   }
 
   return (
-    <div className="flex items-center gap-1 rounded-full border border-gray-200 p-0.5 dark:border-gray-700">
+    <div className="flex items-center gap-1 border border-gray-200 p-0.5 dark:border-gray-700">
       {OPTIONS.map((opt) => (
         <button
           key={opt.value}
@@ -39,7 +38,7 @@ export function ThemeToggle({ initialTheme }: { initialTheme: Theme }) {
           aria-label={`${opt.label} theme`}
           aria-pressed={theme === opt.value}
           onClick={() => handleChange(opt.value)}
-          className={`flex h-7 w-7 items-center justify-center rounded-full ${
+          className={`flex h-7 w-7 items-center justify-center ${
             theme === opt.value
               ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
               : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"

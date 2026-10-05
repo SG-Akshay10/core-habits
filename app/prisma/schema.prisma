@@ -19,7 +19,7 @@ model User {
   image         String?
   timezone      String?
   weekStartDay  Int       @default(0) @map("week_start_day")
-  theme         String    @default("system")
+  theme         String    @default("light")
   defaultView   String    @default("cards") @map("default_view")
   createdAt     DateTime  @default(now())
 

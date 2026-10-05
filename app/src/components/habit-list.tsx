@@ -424,10 +424,10 @@ export function HabitList({
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 sm:gap-7 sm:px-6 sm:py-9">
-      <div className="flex items-end justify-between gap-4">
+      <div className="habit-channel-heading flex items-end justify-between gap-4">
         <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-300">{todayLabel}</p>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Your habits</h1>
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-300">{todayLabel} · {habits.length} ACTIVE CHANNELS</p>
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Dedicated habit channels</h2>
         </div>
         <button
           type="button"
