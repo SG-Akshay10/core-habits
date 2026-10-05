@@ -15,13 +15,11 @@ type ShareTheme = "light" | "dark";
  */
 export function ShareCard({
   habitName,
-  icon,
   logDates,
   today,
   defaultColor,
 }: {
   habitName: string;
-  icon?: string | null;
   logDates: Set<string>;
   today: string;
   defaultColor: string;
