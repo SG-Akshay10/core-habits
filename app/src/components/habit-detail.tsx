@@ -240,7 +240,6 @@ export function HabitDetail({
       >
         <ShareCard
           habitName={name}
-          icon={icon}
           logDates={logDates}
           today={today}
           defaultColor={color}
