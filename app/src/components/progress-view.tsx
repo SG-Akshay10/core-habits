@@ -65,9 +65,9 @@ export function ProgressView({ data }: { data: ProgressData }) {
   )[0];
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Progress</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Progress</h1>
         <Link
           href="/dashboard"
           className="text-sm text-gray-500 hover:underline"
@@ -110,8 +110,8 @@ export function ProgressView({ data }: { data: ProgressData }) {
         <WeeklyRhythmChart data={data.weeklyRhythm} />
       </div>
 
-      <div className="card-surface overflow-hidden rounded-2xl shadow-sm">
-        <table className="w-full text-sm">
+      <div className="card-surface overflow-x-auto rounded-2xl shadow-sm">
+        <table className="w-full min-w-[620px] text-sm">
           <thead>
             <tr className="border-b border-[var(--surface-border)] text-left text-xs text-gray-500">
               <th className="px-4 py-3 font-medium">Habit</th>

@@ -38,7 +38,7 @@ export function HabitChecklistRow({
   const Icon = getHabitIcon(icon);
   return (
     <div
-      className="flex items-center gap-3 rounded-md border border-gray-200 px-3 py-2 dark:border-gray-800"
+      className="card-surface flex min-h-12 items-center gap-3 rounded-xl px-3 py-2 transition hover:shadow-sm dark:border-gray-800"
       data-habit-id={id}
     >
       {isNumeric ? (
@@ -47,7 +47,7 @@ export function HabitChecklistRow({
             type="button"
             onClick={() => onSetValue(Math.max(0, logValue - 1))}
             aria-label={`Decrease ${name}`}
-            className="flex h-7 w-7 items-center justify-center rounded-full border"
+            className="flex h-9 w-9 items-center justify-center rounded-full border transition active:scale-95"
             style={{ borderColor: color, color }}
           >
             <Minus className="h-3.5 w-3.5" />
@@ -56,7 +56,7 @@ export function HabitChecklistRow({
             type="button"
             onClick={() => onSetValue(logValue + 1)}
             aria-label={`Increase ${name}`}
-            className="flex h-7 w-7 items-center justify-center rounded-full border"
+            className="flex h-9 w-9 items-center justify-center rounded-full border transition active:scale-95"
             style={{
               backgroundColor: done ? color : "transparent",
               borderColor: color,
@@ -72,7 +72,7 @@ export function HabitChecklistRow({
           onClick={onToggleToday}
           aria-pressed={isLoggedToday}
           aria-label={`Mark ${name} done today`}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition active:scale-95"
           style={{
             backgroundColor: isLoggedToday ? color : "transparent",
             borderColor: color,

@@ -42,7 +42,7 @@ export default async function DashboardPage() {
         userImage={session.user.image}
         theme={(user?.theme as "light" | "dark" | "system") ?? "system"}
       />
-      <div className="mx-auto w-full max-w-6xl px-6 pt-8">
+      <div className="mx-auto w-full max-w-6xl px-4 pt-5 sm:px-6 sm:pt-8">
         <OverviewStatsBar stats={overview} />
       </div>
       <HabitList

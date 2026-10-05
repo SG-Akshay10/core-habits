@@ -68,6 +68,16 @@ export function HabitList({
       ).length,
     [habits, today],
   );
+  const completion = habits.length ? Math.round((doneToday / habits.length) * 100) : 0;
+  const todayLabel = useMemo(() => {
+    const [year, month, day] = today.split("-").map(Number);
+    return new Intl.DateTimeFormat("en", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(year, month - 1, day)));
+  }, [today]);
 
   function handleViewChange(next: OverviewView) {
     setView(next);
@@ -413,13 +423,16 @@ export function HabitList({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Your habits</h1>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 sm:gap-7 sm:px-6 sm:py-9">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-300">{todayLabel}</p>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Your habits</h1>
+        </div>
         <button
           type="button"
           onClick={() => setAddOpen(true)}
-          className="flex items-center gap-1.5 rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+          className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-600/15 transition hover:bg-indigo-700 active:scale-[.98] dark:bg-indigo-400 dark:text-gray-950 dark:hover:bg-indigo-300"
         >
           <ListPlus className="h-4 w-4" aria-hidden />
           Add habit
@@ -427,24 +440,34 @@ export function HabitList({
       </div>
 
       {habits.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm text-gray-500">
-            {doneToday} of {habits.length} habits done today
-          </p>
+        <div className="card-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 sm:px-5">
+          <div className="min-w-48 flex-1">
+            <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+              <p className="font-medium">Today’s progress</p>
+              <p className="text-gray-500 dark:text-gray-400">{doneToday} of {habits.length} complete</p>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10" role="progressbar" aria-label="Today's habit progress" aria-valuemin={0} aria-valuemax={habits.length} aria-valuenow={doneToday}>
+              <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-[width] duration-500" style={{ width: `${completion}%` }} />
+            </div>
+          </div>
           <ViewSwitcher view={view} onChange={handleViewChange} />
         </div>
       )}
 
       {habits.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-gray-300 py-20 text-center dark:border-gray-700">
-          <Sparkles className="h-8 w-8 text-gray-400" aria-hidden />
-          <p className="text-gray-500">
-            No habits yet. Create your first one to start your streak.
-          </p>
+        <div className="card-surface relative flex flex-col items-center gap-4 overflow-hidden rounded-3xl px-6 py-16 text-center sm:py-20">
+          <div className="absolute -top-24 h-56 w-56 rounded-full bg-indigo-400/10 blur-3xl" aria-hidden />
+          <span className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-300">
+            <Sparkles className="h-7 w-7" aria-hidden />
+          </span>
+          <div className="relative max-w-sm space-y-2">
+            <h2 className="text-xl font-semibold tracking-tight">Small steps add up.</h2>
+            <p className="text-sm leading-6 text-gray-500 dark:text-gray-400">Choose one thing you’d like to make part of your day. We’ll help you keep showing up.</p>
+          </div>
           <button
             type="button"
             onClick={() => setAddOpen(true)}
-            className="flex items-center gap-1.5 rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+            className="relative flex min-h-11 items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-600/15 hover:bg-indigo-700 dark:bg-indigo-400 dark:text-gray-950 dark:hover:bg-indigo-300"
           >
             <ListPlus className="h-4 w-4" aria-hidden />
             Add habit
