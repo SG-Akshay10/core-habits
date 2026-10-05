@@ -32,3 +32,4 @@ yarn-error.log*
 # Neon CLI local state
 .neon
 .prd
+dev-deployment.md
