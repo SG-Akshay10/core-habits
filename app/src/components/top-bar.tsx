@@ -14,15 +14,15 @@ export function TopBar({
   theme?: Theme;
 }) {
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--surface-border)] bg-[var(--surface)]/90 px-6 py-3 backdrop-blur">
-      <Link href="/dashboard" className="font-serif text-xl font-semibold tracking-[0.015em] text-gray-900 dark:text-gray-100">
+    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--surface-border)] bg-[var(--surface)]/85 px-4 py-3 backdrop-blur-xl sm:px-6">
+      <Link href="/dashboard" className="font-serif text-lg font-semibold tracking-[0.015em] text-gray-900 dark:text-gray-100 sm:text-xl">
         Core Habits
       </Link>
 
       <div className="flex items-center gap-3">
         <a
           href="/progress"
-          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100 sm:px-3"
         >
           <BarChart3 className="h-4 w-4" aria-hidden />
           Progress
@@ -49,7 +49,7 @@ export function TopBar({
           )}
         </button>
 
-        <div className="invisible absolute right-0 z-10 mt-2 w-44 rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] py-1 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+        <div className="invisible absolute right-0 z-10 mt-2 w-48 rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] py-1 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
           <div className="truncate px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
             {userName}
           </div>

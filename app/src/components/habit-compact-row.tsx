@@ -29,13 +29,13 @@ export function HabitCompactRow({
   const Icon = getHabitIcon(icon);
 
   return (
-    <div className="flex items-center gap-3 rounded-md border border-gray-200 px-3 py-2 dark:border-gray-800">
+    <div className="card-surface flex min-h-12 items-center gap-3 rounded-xl px-3 py-2 transition hover:shadow-sm dark:border-gray-800">
       <button
         type="button"
         onClick={onToggleToday}
         aria-pressed={isLoggedToday}
         aria-label={`Mark ${name} done today`}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition active:scale-95"
         style={{
           backgroundColor: isLoggedToday ? color : "transparent",
           borderColor: color,

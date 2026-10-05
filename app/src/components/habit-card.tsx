@@ -84,7 +84,7 @@ export function HabitCard({
 
   return (
     <div
-      className="card-surface rounded-2xl p-4 shadow-sm transition hover:shadow-md"
+      className="card-surface rounded-2xl p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-5"
       draggable={draggable}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
@@ -162,7 +162,7 @@ export function HabitCard({
               onClick={onToggleToday}
               aria-pressed={isLoggedToday}
               title={isLoggedToday ? undoLabel : doneLabel}
-              className="flex h-10 w-10 items-center justify-center rounded-full border-2 shadow-sm transition active:scale-95"
+              className="flex h-11 w-11 items-center justify-center rounded-full border-2 shadow-sm transition active:scale-95"
               style={{
                 backgroundColor: isLoggedToday ? color : "transparent",
                 borderColor: color,

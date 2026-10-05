@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { THEME_COOKIE, isValidTheme } from "@/lib/theme";
@@ -59,7 +60,9 @@ export default async function RootLayout({
     >
       <head>
         {theme === "system" && (
-          <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+          <Script id="theme-init" strategy="beforeInteractive">
+            {themeInitScript}
+          </Script>
         )}
       </head>
       <body className="min-h-full flex flex-col">
@@ -69,4 +72,3 @@ export default async function RootLayout({
     </html>
   );
 }
-

@@ -9,10 +9,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f4f5f7;
+  --background: #f7f8fb;
   --foreground: #14161a;
   --surface: #ffffff;
-  --surface-border: rgba(20, 22, 26, 0.08);
+  --surface-border: rgba(20, 22, 26, 0.07);
   --habit-grid-empty: #e5e7eb;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .dark {
-  --background: #0c0d10;
+  --background: #0d0f14;
   --foreground: #f2f3f5;
   --surface: #17181c;
   --surface-border: rgba(255, 255, 255, 0.08);
@@ -33,14 +33,92 @@
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(ellipse at 50% -14rem, rgba(99, 102, 241, 0.075), transparent 42rem),
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
 }
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 3px;
+}
+
+::selection { background: #c7d2fe; color: #1e1b4b; }
+.dark ::selection { background: #3730a3; color: #eef2ff; }
 
 .card-surface {
   background: var(--surface);
   border: 1px solid var(--surface-border);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.025), 0 8px 24px rgba(15, 23, 42, 0.025);
+}
+
+.dark .card-surface {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15), 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Landing page brand colors and mock product layout. These small, unlayered
+   rules keep the showcase legible even when utility styles are overridden by
+   browser or embedded preview defaults. */
+.landing-page .landing-primary-button {
+  background-color: #4f46e5;
+  color: #fff;
+}
+
+.landing-page .landing-preview-frame {
+  background-color: #0f172a;
+}
+
+.landing-page .landing-preview-grid {
+  display: grid;
+  grid-template-columns: 125px minmax(0, 1fr);
+  text-align: left;
+}
+
+.landing-page .landing-preview-sidebar {
+  border-right: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  text-align: left;
+}
+
+.landing-page .landing-preview-main {
+  background-color: #fff;
+  text-align: left;
+}
+
+.landing-page .landing-preview-topbar {
+  border-bottom-color: #e2e8f0;
+}
+
+.landing-page .landing-preview-row {
+  border-color: #e2e8f0;
+}
+
+.dark .landing-page .landing-preview-sidebar {
+  border-right-color: rgba(255, 255, 255, 0.1);
+  background-color: #151821;
+}
+
+.dark .landing-page .landing-preview-main {
+  background-color: #0d0f14;
+}
+
+.dark .landing-page .landing-preview-topbar,
+.dark .landing-page .landing-preview-row {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 640px) {
+  .landing-page .landing-preview-grid {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
 }
 
 .icon-picker-scroll {
