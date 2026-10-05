@@ -1,26 +1,100 @@
 import { auth } from "@/auth";
 import { TopBar } from "@/components/top-bar";
 import { TimezoneSync } from "@/components/timezone-sync";
+import { HabitList } from "@/components/habit-list";
+import { DashboardConsole } from "@/components/dashboard-console";
+import { prisma } from "@/lib/prisma";
+import { todayInTimezone } from "@/lib/date";
+import { computeOverviewStats } from "@/lib/overview-stats";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect("/");
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { timezone: true, weekStartDay: true, theme: true, defaultView: true },
+  });
+  const today = todayInTimezone(user?.timezone ?? "UTC");
+
+  const [habits, archivedHabits, overview] = await Promise.all([
+    prisma.habit.findMany({
+      where: { userId: session.user.id, archivedAt: null },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      include: { logs: { select: { date: true, value: true } } },
+    }),
+    prisma.habit.findMany({
+      where: { userId: session.user.id, archivedAt: { not: null } },
+      orderBy: { archivedAt: "desc" },
+      include: { logs: { select: { date: true, value: true } } },
+    }),
+    computeOverviewStats(session.user.id, today),
+  ]);
+
   return (
-    <div className="min-h-screen">
+    <div className="telemetry-dashboard min-h-screen bg-[var(--background)]">
       <TimezoneSync />
-      <TopBar userName={session.user.name} userImage={session.user.image} />
-      <main className="flex flex-col items-center justify-center gap-3 px-6 py-24 text-center">
-        <h1 className="text-2xl font-semibold">
-          Welcome, {session.user.name?.split(" ")[0]}
-        </h1>
-        <p className="max-w-md text-gray-500">
-          Your dashboard is empty for now — habit creation ships in Week 2.
-        </p>
+      <TopBar
+        userName={session.user.name}
+        userImage={session.user.image}
+        theme={user?.theme === "dark" ? "dark" : "light"}
+      />
+      <main className="dashboard-main">
+        <DashboardConsole
+          today={today}
+          habits={habits.map((habit) => ({
+            logDates: habit.logs.map((log) => log.date),
+            goalType: habit.goalType,
+            goalCount: habit.goalCount,
+          }))}
+          bestStreak={overview.bestStreak}
+          activeHabits={overview.activeHabits}
+          totalCheckIns={overview.totalCheckIns}
+        />
+      <HabitList
+        today={today}
+        weekStartDay={user?.weekStartDay ?? 0}
+        initialView={
+          (user?.defaultView as "cards" | "checklist" | "compact") ?? "cards"
+        }
+        initialHabits={habits.map((h) => ({
+          id: h.id,
+          name: h.name,
+          color: h.color,
+          icon: h.icon,
+          type: h.type,
+          goalType: h.goalType,
+          goalCount: h.goalCount,
+          isNumeric: h.isNumeric,
+          targetCount: h.targetCount,
+          unitLabel: h.unitLabel,
+          logDates: h.logs.map((l) => l.date),
+          logValues: Object.fromEntries(
+            h.logs.map((l) => [l.date, l.value]),
+          ),
+        }))}
+        initialArchivedHabits={archivedHabits.map((h) => ({
+          id: h.id,
+          name: h.name,
+          color: h.color,
+          icon: h.icon,
+          type: h.type,
+          goalType: h.goalType,
+          goalCount: h.goalCount,
+          isNumeric: h.isNumeric,
+          targetCount: h.targetCount,
+          unitLabel: h.unitLabel,
+          logDates: h.logs.map((l) => l.date),
+          logValues: Object.fromEntries(
+            h.logs.map((l) => [l.date, l.value]),
+          ),
+        }))}
+      />
       </main>
     </div>
   );
+
 }
