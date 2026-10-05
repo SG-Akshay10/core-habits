@@ -106,7 +106,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
   return (
     <main className="analytics-view">
       <section className="analytics-hero">
-        <div><p className="analytics-eyebrow"><i /> TELEMETRY MODE <b>//</b> AGGREGATED STATS</p>
+        <div><p className="analytics-eyebrow"><i /> TELEMETRY MODE <b>{"//"}</b> AGGREGATED STATS</p>
           <h1>Analytics <span>&amp; Streaks</span></h1>
           <p className="analytics-subtitle">Completions, consistency, and personal records, charted month by month.</p>
         </div>
